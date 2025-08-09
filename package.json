@@ -1,0 +1,34 @@
+{
+  "name": "photo-studio-api",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "public": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.1.0"
+  },
+  "dependencies": {
+    "@nestjs/cli": "^11.0.7",
+    "@nestjs/common": "^11.1.5",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/platform-express": "^11.1.5",
+    "@nestjs/serve-static": "^5.0.3",
+    "cookie-parser": "^1.4.7",
+    "mongoose": "^8.16.4",
+    "uuid": "^11.1.0"
+  }
+}
