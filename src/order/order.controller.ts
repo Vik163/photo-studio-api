@@ -25,10 +25,10 @@ export class OrderController {
     await this.orderService.addOrders(res, body);
   }
 
-  // @Get('basket')
-  // async getBasket(): Promise<BasketTotalDto> {
-  //   return this.orderService.getBasket();
-  // }
+  @Get()
+  async getBasket(): Promise<string> {
+    return 'Hi';
+  }
 
   // @Put('basket/:id')
   // async decreaseBasket(@Param('id') id: string): Promise<BasketTotalDto> {
