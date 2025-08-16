@@ -16,9 +16,13 @@ import { Response } from 'express';
 export class OrderController {
   constructor(readonly orderService: OrderService) {}
 
+  // @Post()
+  // async addOrder(@Res() res: Response, @Body() body: OrderDto): Promise<void> {
+  //   await this.orderService.addOrder(res, body);
+  // }
   @Post()
-  async addOrder(@Res() res: Response, @Body() body: OrderDto): Promise<void> {
-    await this.orderService.addOrder(res, body);
+  async addOrders(@Res() res: Response, @Body() body: OrderDto): Promise<void> {
+    await this.orderService.addOrders(res, body);
   }
 
   // @Get('basket')

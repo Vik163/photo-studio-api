@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { OneOrderDto } from '../dto/order.dto';
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -9,22 +10,22 @@ export class Order {
   _id: string;
 
   @Prop()
-  owner: string;
-
-  @Prop()
   name: string;
 
   @Prop()
   phone: string;
 
   @Prop()
-  message: string;
+  type: 'order' | 'message';
 
   @Prop()
-  service: string;
+  message?: string;
 
   @Prop()
-  images: File[];
+  service?: string;
+
+  @Prop()
+  images?: File[];
 
   @Prop()
   competedImages?: File[];
@@ -37,3 +38,22 @@ export class Order {
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+export type OrdersDocument = HydratedDocument<Orders>;
+
+@Schema()
+export class Orders {
+  @Prop()
+  _id: string;
+
+  @Prop()
+  name: string;
+
+  @Prop()
+  phone: string;
+
+  @Prop()
+  orders: OneOrderDto[];
+}
+
+export const OrdersSchema = SchemaFactory.createForClass(Orders);
