@@ -9,6 +9,5 @@ export const config = (): ConfigProps => ({
   ],
   token_secret: process.env.TOKEN_SECRET,
   time_token: 15,
-  // host
   api: process.env.API_URL,
 });
