@@ -10,64 +10,20 @@ import { Response } from 'express';
 @Injectable()
 export class OrderService {
   _id: string;
+  userPhone: string;
 
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private tokenService: TokensService,
   ) {
     this._id = '';
+    this.userPhone = '';
   }
-
-  // async addOrder(res: Response, body: OrderDto): Promise<void> {
-  //   this.userPhone = body.phone;
-  //   const newDate = new Date();
-  //   const orderDto: OrderDto = {
-  //     _id: uuidv4(),
-  //     name: body.name,
-  //     phone: this.userPhone,
-  //     type: body.type,
-  //     message: body.message,
-  //     images: body.images,
-  //     service: body.service,
-  //     status: 'Принят',
-  //     createdAt: newDate,
-  //   };
-
-  //   const createdData = new this.orderModel(orderDto);
-  //   await createdData.save();
-
-  //   const token = await this.tokenService.getToken(this.userPhone);
-  //   if (token) {
-  //     const arrData = await this.getOrders();
-
-  //     const data = arrData.map((order) => {
-  //       return { service: order.service, status: order.status };
-  //     });
-  //     res
-  //       .cookie('__order', token, {
-  //         secure: true,
-  //         httpOnly: true,
-  //         sameSite: 'strict',
-  //         maxAge: 60 * 60 * 24 * 1000 * 15,
-  //       })
-  //       .send({ data });
-  //   }
-  // }
 
   async addOrder(res: Response, body: BodyDto): Promise<void> {
     console.log('body:', body);
+    this.userPhone = body.phone;
     const newDate = new Date();
-    // const orderDto: OrderDto = {
-    //   _id: uuidv4(),
-    //   name: body.name,
-    //   phone: this.userPhone,
-    //   type: body.type,
-    //   message: body.message,
-    //   images: body.images,
-    //   service: body.service,
-    //   status: 'Принят',
-    //   createdAt: newDate,
-    // };
 
     const existOrders = await this.getOrders();
 
@@ -129,7 +85,7 @@ export class OrderService {
   }
 
   async getOrders(): Promise<OrderDto> {
-    return await this.orderModel.findOne({ _id: this._id }).exec();
+    return await this.orderModel.findOne({ phone: this.userPhone }).exec();
   }
 
   // async getUser(numberPhone: string): Promise<UserDto> {
