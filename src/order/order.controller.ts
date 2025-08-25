@@ -9,20 +9,16 @@ import {
   Res,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { OrderDto } from './dto/order.dto';
+import { BodyDto, OrderDto } from './dto/order.dto';
 import { Response } from 'express';
 
 @Controller('order')
 export class OrderController {
   constructor(readonly orderService: OrderService) {}
 
-  // @Post()
-  // async addOrder(@Res() res: Response, @Body() body: OrderDto): Promise<void> {
-  //   await this.orderService.addOrder(res, body);
-  // }
   @Post()
-  async addOrders(@Res() res: Response, @Body() body: OrderDto): Promise<void> {
-    await this.orderService.addOrders(res, body);
+  async addOrder(@Res() res: Response, @Body() body: BodyDto): Promise<void> {
+    await this.orderService.addOrder(res, body);
   }
 
   @Get()

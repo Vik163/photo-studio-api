@@ -6,18 +6,15 @@ import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 
 // https сертификаты --------------------------
-// const httpsOptions = {
-//   key: readFileSync('../security/photostudio.ru+3-key.pem'),
-//   cert: readFileSync('../security/photostudio.ru+3.pem'),
-// };
+const httpsOptions = {
+  key: readFileSync('../security/photostudio.ru+3-key.pem'),
+  cert: readFileSync('../security/photostudio.ru+3.pem'),
+};
 
 async function bootstrap() {
-  const app = await NestFactory.create(
-    AppModule,
-    //   , {
-    //   httpsOptions,
-    // }
-  );
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
 
   const configService = app.get(ConfigService);
 
