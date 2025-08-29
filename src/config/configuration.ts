@@ -8,6 +8,6 @@ export const config = (): ConfigProps => ({
     'https://photosalon.online',
   ],
   token_secret: process.env.TOKEN_SECRET,
-  time_token: 15,
+  time_token: 60 * 60 * 24 * 1000 * 15,
   api: process.env.API_URL,
 });

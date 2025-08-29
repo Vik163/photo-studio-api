@@ -1,41 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { BodyDto, OneOrderDto, OrderDto } from './dto/order.dto';
+import { BodyDto, OneOrderDto, OrderDto, ResOrdersDto } from './dto/order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order } from './schemas/order.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from 'src/token/tokens.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { BasketService } from './basket.service';
 
 @Injectable()
 export class OrderService {
-  _id: string;
-  userPhone: string;
+  userId: string;
+  newOrder: OrderDto;
 
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private tokenService: TokensService,
+    private basketService: BasketService,
   ) {
-    this._id = '';
-    this.userPhone = '';
+    this.userId = '';
+    this.newOrder = null;
   }
 
-  async addOrder(res: Response, body: BodyDto): Promise<void> {
-    console.log('body:', body);
-    this.userPhone = body.phone;
+  async addOrder(res: Response, body: BodyDto, token?: string): Promise<void> {
     const newDate = new Date();
+    let existOrders: OrderDto = undefined;
 
-    const existOrders = await this.getOrders();
+    if (token) {
+      this.userId = await this.tokenService.getPayloadByCookie(token);
+      existOrders = await this.basketService.getDataByUserId(this.userId);
+    } else existOrders = await this.basketService.getDataByPhone(body.phone);
 
     if (existOrders) {
-      this._id = existOrders._id;
+      this.userId = existOrders.userId;
 
       const order: OneOrderDto = {
         orderId: body.orderId,
+        name: body.name,
+        phone: body.phone,
         message: body.message,
         images: body.images,
         service: body.service,
-        status: 'Принят',
+        status: 'Создан',
         createdAt: newDate,
       };
 
@@ -44,86 +50,58 @@ export class OrderService {
       const createdData = new this.orderModel(existOrders);
 
       await createdData.updateOne();
-      await createdData.save();
+      this.newOrder = await createdData.save();
     } else {
-      this._id = uuidv4();
+      this.userId = uuidv4();
       const order: OrderDto = {
-        _id: this._id,
-        name: body.name,
-        phone: body.phone,
+        userId: this.userId,
         orders: [
           {
             orderId: body.orderId,
+            name: body.name,
+            phone: body.phone,
             message: body.message,
             images: body.images,
             service: body.service,
-            status: 'Принят',
+            status: 'Создан',
             createdAt: newDate,
           },
         ],
       };
       const createdData = new this.orderModel(order);
-      await createdData.save();
+      this.newOrder = await createdData.save();
     }
 
-    const token = await this.tokenService.getToken(this._id);
-    if (token) {
-      const arrData = await this.getOrders();
+    this.basketService.sendBasketWithCookie(res, 'Заказ успешно создан');
+  }
 
-      const data = arrData.orders.map((order) => {
-        return { service: order.service, status: order.status };
-      });
-      res
-        .cookie('__order', token, {
-          secure: true,
-          httpOnly: true,
-          sameSite: 'strict',
-          maxAge: 60 * 60 * 24 * 1000 * 15,
-        })
-        .send({ data });
+  async _deleteDataByUserId(res: Response, userId: string) {
+    const data = await this.orderModel
+      .findOneAndDelete({ userId: userId })
+      .exec();
+    if (data) this.tokenService.deleteToken(res);
+    res.send({ message: 'Заказ успешно удалён' });
+  }
+
+  async deleteOrder(res: Response, token: string, orderId: string) {
+    const userId = await this.tokenService.getPayloadByCookie(token);
+    const data = await this.basketService.getDataByUserId(userId);
+
+    if (data.orders.length < 2) {
+      this._deleteDataByUserId(res, userId);
+    } else {
+      data.orders = data.orders.filter((order) => order.orderId !== orderId);
+
+      const createdData = new this.orderModel(data);
+
+      await createdData.updateOne();
+      this.newOrder = await createdData.save();
+
+      this.basketService.sendBasketWithCookie(res, 'Заказ успешно удалён');
     }
   }
 
-  async getOrders(): Promise<OrderDto> {
-    return await this.orderModel.findOne({ phone: this.userPhone }).exec();
+  async updateOrder(res: Response, body: BodyDto, token?: string) {
+    console.log('body:', body);
   }
-
-  // async getUser(numberPhone: string): Promise<UserDto> {
-  //   return await this.userModel.findOne({ phone: numberPhone }).exec();
-  // }
-
-  // async createUser(user: UserDto): Promise<void> {
-  //   const createdData = new this.userModel(user);
-  //   await createdData.save();
-  // }
-
-  // async decreaseBasket(id: string): Promise<BasketTotalDto> {
-  //   const product: BasketDto = await this.basketRepository.findOne({
-  //     where: { id: id },
-  //   });
-
-  //   if (product) {
-  //     product.quantity = product.quantity - 1;
-  //     product.totalPrice = product.price * product.quantity;
-  //   }
-
-  //   const basketDto: BasketDto = await this.basketRepository.save(product);
-
-  //   if (basketDto) {
-  //     return this.getBasket();
-  //   }
-  // }
-
-  // async deleteBasket(id: string): Promise<BasketTotalDto> {
-  //   const product: BasketDto = await this.basketRepository.findOne({
-  //     where: { id: id },
-  //   });
-  //   if (product) {
-  //     const deleteProduct = await this.basketRepository.remove(product);
-
-  //     if (deleteProduct) {
-  //       return this.getBasket();
-  //     }
-  //   }
-  // }
 }

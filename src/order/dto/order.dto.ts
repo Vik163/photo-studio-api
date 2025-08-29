@@ -1,7 +1,5 @@
 export class OrderDto {
-  _id: string;
-  name: string;
-  phone: string;
+  userId: string;
   orders: OneOrderDto[];
 }
 
@@ -16,10 +14,35 @@ export class BodyDto {
 
 export class OneOrderDto {
   orderId: string;
+  name: string;
+  phone: string;
   service: string;
   message?: string;
   images?: string[];
-  completedImages?: string[];
-  status: 'Принят' | 'В работе' | 'Завершён';
+  completedImages?: string;
+  status:
+    | 'Создан'
+    | 'Отложен'
+    | 'Отменён'
+    | 'Принят'
+    | 'В работе'
+    | 'Выполнен'
+    | 'Завершён';
   createdAt: Date;
+}
+
+export class ResOrdersDto {
+  orderId: string;
+  name: string;
+  service: string;
+  message?: string;
+  completedImages?: string;
+  status:
+    | 'Создан'
+    | 'Отложен'
+    | 'Отменён'
+    | 'Принят'
+    | 'В работе'
+    | 'Выполнен'
+    | 'Завершён';
 }
