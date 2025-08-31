@@ -28,7 +28,7 @@ export class OneOrderDto {
     | 'В работе'
     | 'Выполнен'
     | 'Завершён';
-  createdAt: Date;
+  createdAt: string;
 }
 
 export class ResOrdersDto {

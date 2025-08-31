@@ -8,16 +8,10 @@ import { Response } from 'express';
 
 @Injectable()
 export class BasketService {
-  userId: string;
-  newOrder: OrderDto;
-
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private tokenService: TokensService,
-  ) {
-    this.userId = '';
-    this.newOrder = null;
-  }
+  ) {}
 
   async getDataByPhone(userPhone: string): Promise<OrderDto> {
     const data = await this.orderModel.findOne({ phone: userPhone }).exec();
@@ -46,11 +40,15 @@ export class BasketService {
     } else return null;
   }
 
-  async sendBasketWithCookie(res: Response, message: string) {
-    if (this.newOrder) {
-      const order = await this.getBasketByUserId(this.newOrder.userId);
+  async sendBasketWithCookie(
+    res: Response,
+    newOrder: OrderDto,
+    message: string,
+  ) {
+    if (newOrder) {
+      const order = await this.getBasketByUserId(newOrder.userId);
 
-      const response = await this.tokenService.sendToken(res, this.userId);
+      const response = await this.tokenService.sendToken(res, newOrder.userId);
       if (response) {
         res.send(order);
       } else res.send({ message });

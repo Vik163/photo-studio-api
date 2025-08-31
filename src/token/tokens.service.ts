@@ -33,7 +33,6 @@ export class TokensService {
       secret: this.configService.get<string>('token_secret'),
     });
 
-    console.log('payload:', payload);
     if (payload) {
       return payload.userId;
     } else {

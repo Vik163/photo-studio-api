@@ -23,7 +23,10 @@ export class OrderService {
   }
 
   async addOrder(res: Response, body: BodyDto, token?: string): Promise<void> {
-    const newDate = new Date();
+    const date = new Date();
+    const monthString = (date.getMonth() + 1).toString();
+    const month = monthString.length === 1 ? `0${monthString}` : monthString;
+    const newDate = `${date.getDate()}. ${month}`;
     let existOrders: OrderDto = undefined;
 
     if (token) {
@@ -72,7 +75,11 @@ export class OrderService {
       this.newOrder = await createdData.save();
     }
 
-    this.basketService.sendBasketWithCookie(res, 'Заказ успешно создан');
+    this.basketService.sendBasketWithCookie(
+      res,
+      this.newOrder,
+      'Заказ успешно создан',
+    );
   }
 
   async _deleteDataByUserId(res: Response, userId: string) {
@@ -97,11 +104,35 @@ export class OrderService {
       await createdData.updateOne();
       this.newOrder = await createdData.save();
 
-      this.basketService.sendBasketWithCookie(res, 'Заказ успешно удалён');
+      this.basketService.sendBasketWithCookie(
+        res,
+        this.newOrder,
+        'Заказ успешно удалён',
+      );
     }
   }
 
   async updateOrder(res: Response, body: BodyDto, token?: string) {
-    console.log('body:', body);
+    const userId = await this.tokenService.getPayloadByCookie(token);
+    if (userId) {
+      const basket = await this.basketService.getDataByUserId(userId);
+      const orders = basket.orders;
+      const index = orders.findIndex((el) => el.orderId === body.orderId);
+
+      orders[index].images = body.images;
+      orders[index].message = body.message;
+      orders[index].service = body.service;
+
+      const createdData = new this.orderModel(basket);
+
+      await createdData.updateOne();
+      this.newOrder = await createdData.save();
+
+      this.basketService.sendBasketWithCookie(
+        res,
+        this.newOrder,
+        'Заказ успешно изменён',
+      );
+    }
   }
 }

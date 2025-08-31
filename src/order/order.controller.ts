@@ -32,12 +32,11 @@ export class OrderController {
     await this.orderService.addOrder(res, body, token);
   }
 
-  @Put(':id')
+  @Put()
   async dupdateOrder(
     @Res() res: Response,
     @Req() req: Request,
     @Body() body: BodyDto,
-    @Param('id') id: string,
   ): Promise<void> {
     const token: string = req.cookies.__order;
     await this.orderService.updateOrder(res, body, token);
