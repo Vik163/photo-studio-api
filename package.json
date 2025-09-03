@@ -11,7 +11,8 @@
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main",
+    "deploy": "npm run build && scp -r ./dist/* vik@77.222.60.220:/home/vik/photo-studio-api"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",
