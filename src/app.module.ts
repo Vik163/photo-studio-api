@@ -6,6 +6,7 @@ import { OrderModule } from './order/order.module';
 import { config } from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessagesModule } from './messages/messages.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MessagesModule } from './messages/messages.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../public/images'),
     }),
+    AuthModule,
     OrderModule,
     MessagesModule,
   ],

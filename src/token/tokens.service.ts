@@ -16,6 +16,22 @@ export class TokensService {
     private jwtService: JwtService,
   ) {}
 
+  async getAdminTokens(): Promise<{
+    adminToken: string;
+    controlToken: string;
+  }> {
+    const payload = { adminId: 'admin' };
+
+    const adminToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('admin_token_secret'),
+    });
+    const controlToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('control_token_secret'),
+    });
+
+    return { adminToken, controlToken };
+  }
+
   async getToken(userId: string): Promise<string> {
     if (userId) {
       const payload = { userId };
@@ -56,9 +72,35 @@ export class TokensService {
     }
   }
 
+  async sendAdminTokens(res: Response): Promise<void> {
+    const { controlToken, adminToken } = await this.getAdminTokens();
+    if (Boolean(adminToken) && Boolean(controlToken)) {
+      res
+        .cookie('__secure_admin', adminToken, {
+          secure: true,
+          httpOnly: true,
+          sameSite: 'strict',
+        })
+        .cookie('control_admin', controlToken, {
+          secure: true,
+          sameSite: 'strict',
+        })
+        .send({ message: 'Авторизован' });
+    } else {
+      this.deleteAdminTokens(res);
+    }
+  }
+
   // Выход ===================================================================
   async deleteToken(res: Response) {
     res.clearCookie('__order');
+  }
+
+  async deleteAdminTokens(res: Response) {
+    res
+      .clearCookie('__secure_admin')
+      .clearCookie('control_admin')
+      .send({ message: 'Не авторизован' });
   }
 
   //   async canActivate(

@@ -9,16 +9,14 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "deploy": "npm run build && scp -r ./dist/* vik@77.222.60.220:/home/vik/photo-studio-api"
+    "dev": "nest start --watch"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/node": "^24.1.0"
+    "@types/node": "^24.1.0",
+    "@types/passport": "^1.0.17"
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.7",
@@ -26,6 +24,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.5",
     "@nestjs/serve-static": "^5.0.3",
     "cookie-parser": "^1.4.7",
