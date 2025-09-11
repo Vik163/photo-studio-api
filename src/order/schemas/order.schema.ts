@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { OneOrderDto } from '../dto/order.dto';
 
 export type OrderDocument = HydratedDocument<Order>;

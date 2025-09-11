@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BodyDto, OneOrderDto, OrderDto, ResOrdersDto } from './dto/order.dto';
+import { BodyDto, OneOrderDto, OrderDto } from './dto/order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order } from './schemas/order.schema';
@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from 'src/token/tokens.service';
 import { Request, Response } from 'express';
 import { BasketService } from './basket.service';
+import { getDates } from 'src/utils/lib/getDates';
+import { MessagesService } from 'src/messages/messages.service';
 
 @Injectable()
 export class OrderService {
@@ -17,63 +19,72 @@ export class OrderService {
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private tokenService: TokensService,
     private basketService: BasketService,
+    private messagesService: MessagesService,
   ) {
     this.userId = '';
     this.newOrder = null;
   }
 
   async addOrder(res: Response, body: BodyDto, token?: string): Promise<void> {
-    const date = new Date();
-    const monthString = (date.getMonth() + 1).toString();
-    const month = monthString.length === 1 ? `0${monthString}` : monthString;
-    const newDate = `${date.getDate()}. ${month}`;
     let existOrders: OrderDto = undefined;
 
     if (token) {
       this.userId = await this.tokenService.getPayloadByCookie(token);
-      existOrders = await this.basketService.getDataByUserId(this.userId);
-    } else existOrders = await this.basketService.getDataByPhone(body.phone);
+      existOrders =
+        (await this.basketService.getDataByUserId(this.userId)) || null;
+    }
 
     if (existOrders) {
       this.userId = existOrders.userId;
-
-      const order: OneOrderDto = {
-        orderId: body.orderId,
-        name: body.name,
-        phone: body.phone,
-        message: body.message,
-        images: body.images,
-        service: body.service,
-        status: 'Создан',
-        createdAt: newDate,
-      };
-
-      existOrders.orders.push(order);
-
-      const createdData = new this.orderModel(existOrders);
-
-      await createdData.updateOne();
-      this.newOrder = await createdData.save();
+      await this._updateOrder(res, existOrders, body);
     } else {
-      this.userId = uuidv4();
-      const order: OrderDto = {
-        userId: this.userId,
-        orders: [
-          {
-            orderId: body.orderId,
-            name: body.name,
-            phone: body.phone,
-            message: body.message,
-            images: body.images,
-            service: body.service,
-            status: 'Создан',
-            createdAt: newDate,
-          },
-        ],
-      };
-      const createdData = new this.orderModel(order);
-      this.newOrder = await createdData.save();
+      await this._createOrder(res, body);
     }
+  }
+
+  async _updateOrder(res: Response, existOrders: OrderDto, body: BodyDto) {
+    const { date, dayAndMonth } = getDates();
+    const order: OneOrderDto = {
+      orderId: body.orderId,
+      name: body.name,
+      phone: body.phone,
+      message: body.message,
+      images: body.images,
+      service: body.service,
+      status: 'Создан',
+      createdAt: date,
+      created: dayAndMonth,
+    };
+
+    existOrders.orders.push(order);
+
+    await this._updateBD(res, existOrders.orders, 'Заказ успешно создан');
+  }
+
+  async _createOrder(res: Response, body: BodyDto) {
+    const { date, dayAndMonth } = getDates();
+    const messages = await this.messagesService.getMessagesByUserId(
+      this.userId,
+    );
+    this.userId = messages ? this.userId : uuidv4();
+    const order: OrderDto = {
+      userId: this.userId,
+      orders: [
+        {
+          orderId: body.orderId,
+          name: body.name,
+          phone: body.phone,
+          message: body.message,
+          images: body.images,
+          service: body.service,
+          status: 'Создан',
+          createdAt: date,
+          created: dayAndMonth,
+        },
+      ],
+    };
+    const createdData = new this.orderModel(order);
+    this.newOrder = await createdData.save();
 
     this.basketService.sendBasketWithCookie(
       res,
@@ -123,16 +134,21 @@ export class OrderService {
       orders[index].message = body.message;
       orders[index].service = body.service;
 
-      const createdData = new this.orderModel(basket);
-
-      await createdData.updateOne();
-      this.newOrder = await createdData.save();
-
-      this.basketService.sendBasketWithCookie(
-        res,
-        this.newOrder,
-        'Заказ успешно изменён',
-      );
+      await this._updateBD(res, basket.orders, 'Заказ успешно изменён');
     }
+  }
+
+  async _updateBD(res: Response, orders: OneOrderDto[], message: string) {
+    const newData: OrderDto = {
+      userId: this.userId,
+      orders,
+    };
+
+    this.newOrder = await this.orderModel.findOneAndUpdate(
+      { userId: this.userId },
+      newData,
+    );
+
+    this.basketService.sendBasketWithCookie(res, this.newOrder, message);
   }
 }

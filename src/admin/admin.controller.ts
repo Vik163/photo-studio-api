@@ -10,26 +10,22 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { OrderService } from './order.service';
-import { BodyDto, ResOrdersDto } from './dto/order.dto';
+import { BodyDto, OrderDto, ResOrdersDto } from '../order/dto/order.dto';
 import { Request, Response } from 'express';
-import { BasketService } from './basket.service';
+import { BasketService } from '../order/basket.service';
+import { AdminService } from './admin.service';
+import { OrdersUserDto } from './dto/admin.dto';
 
-@Controller('orders')
-export class OrderController {
+@Controller('admin')
+export class AdminController {
   constructor(
-    readonly orderService: OrderService,
+    readonly adminService: AdminService,
     private basketService: BasketService,
   ) {}
 
-  @Post()
-  async addOrder(
-    @Res() res: Response,
-    @Req() req: Request,
-    @Body() body: BodyDto,
-  ): Promise<void> {
-    const token: string = req.cookies.__order;
-    await this.orderService.addOrder(res, body, token);
+  @Get('orders')
+  async getOrders(): Promise<OrdersUserDto[]> {
+    return this.adminService.getOrders();
   }
 
   @Put()
@@ -39,7 +35,7 @@ export class OrderController {
     @Body() body: BodyDto,
   ): Promise<void> {
     const token: string = req.cookies.__order;
-    await this.orderService.updateOrder(res, body, token);
+    await this.adminService.updateOrder(res, body, token);
   }
 
   @Delete(':id')
@@ -50,17 +46,8 @@ export class OrderController {
   ): Promise<void> {
     const token: string = req.cookies.__order;
     if (token) {
-      await this.orderService.deleteOrder(res, token, id);
+      await this.adminService.deleteOrder(res, token, id);
     }
-  }
-
-  @Get('basket')
-  async getBasket(@Req() req: Request): Promise<ResOrdersDto[]> {
-    const token: string = req.cookies.__order;
-    if (token) {
-      const answer = await this.basketService.getBasket(token);
-      return answer;
-    } else return null;
   }
 
   // @Put('basket/:id')

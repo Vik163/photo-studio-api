@@ -1,24 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { OneMessageDto } from '../dto/messages.dto';
 
-export type CatDocument = HydratedDocument<Message>;
+export type MessageDocument = HydratedDocument<Message>;
 
 @Schema()
 export class Message {
   @Prop()
-  _id: string;
+  userId: string;
 
   @Prop()
-  name: string;
-
-  @Prop()
-  phone: string;
-
-  @Prop()
-  message: string;
-
-  @Prop()
-  createdAt: Date;
+  messages: OneMessageDto[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

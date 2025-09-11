@@ -7,6 +7,7 @@ import { config } from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
       rootPath: join(__dirname, '../../public/images'),
     }),
     AuthModule,
+    AdminModule,
     OrderModule,
     MessagesModule,
   ],

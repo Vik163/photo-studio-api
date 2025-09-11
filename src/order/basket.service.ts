@@ -13,11 +13,6 @@ export class BasketService {
     private tokenService: TokensService,
   ) {}
 
-  async getDataByPhone(userPhone: string): Promise<OrderDto> {
-    const data = await this.orderModel.findOne({ phone: userPhone }).exec();
-    return data;
-  }
-
   async getDataByUserId(userId: string): Promise<OrderDto> {
     const data = await this.orderModel.findOne({ userId: userId }).exec();
     return data;

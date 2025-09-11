@@ -1,3 +1,12 @@
+export type StatusOrder =
+  | 'Создан' // редактирование, удаление, no-image, нет скачивания
+  | 'Отложен' // редактирование, удаление, no-image, нет скачивания
+  | 'Отменён' // редактирование, удаление, no-image, нет скачивания
+  | 'Принят' // редактирование, удаление, no-image, нет скачивания
+  | 'В работе' // no-image, нет скачивания
+  | 'Выполнен' // готовое фото через фильтр, нет скачивания
+  | 'Завершён'; // удаление, готовое фото, скачивание
+
 export class OrderDto {
   userId: string;
   orders: OneOrderDto[];
@@ -20,29 +29,15 @@ export class OneOrderDto {
   message?: string;
   images?: string[];
   completedImages?: string; // src сформированный fileReader  (хранится только в БД)
-  status:
-    | 'Создан' // редактирование, удаление, no-image, нет скачивания
-    | 'Отложен' // редактирование, удаление, no-image, нет скачивания
-    | 'Отменён' // редактирование, удаление, no-image, нет скачивания
-    | 'Принят' // редактирование, удаление, no-image, нет скачивания
-    | 'В работе' // no-image, нет скачивания
-    | 'Выполнен' // готовое фото через фильтр, нет скачивания
-    | 'Завершён'; // удаление, готовое фото, скачивание
-  createdAt: string;
+  status: StatusOrder;
+  createdAt: Date;
+  created: string;
 }
 
 export class ResOrdersDto {
   orderId: string;
-  name: string;
   service: string;
   message?: string;
   completedImages?: string;
-  status:
-    | 'Создан'
-    | 'Отложен'
-    | 'Отменён'
-    | 'Принят'
-    | 'В работе'
-    | 'Выполнен'
-    | 'Завершён';
+  status: StatusOrder;
 }

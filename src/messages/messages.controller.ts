@@ -11,22 +11,27 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { Request, Response } from 'express';
-import { MailData } from './dto/messages.dto';
+import { MailData, MessagesDto } from './dto/messages.dto';
 
-@Controller('message')
+@Controller('messages')
 export class MessagesController {
   constructor(readonly messagesService: MessagesService) {}
 
   @Post()
-  async addMesssage(@Body() body: MailData): Promise<string> {
-    console.log(body);
-    return await this.messagesService.addMesssage(body);
+  async addMesssage(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Body() body: MailData,
+  ): Promise<void> {
+    const token: string = req.cookies.__order;
+    await this.messagesService.addMessage(res, body, token);
   }
 
-  // @Get('basket')
-  // async getBasket(): Promise<BasketTotalDto> {
-  //   return this.orderService.getBasket();
-  // }
+  @Get()
+  async getMessages(@Res() res: Response, @Req() req: Request): Promise<void> {
+    const token: string = req.cookies.__order;
+    await this.messagesService.getMessages(res, token);
+  }
 
   // @Put('basket/:id')
   // async decreaseBasket(@Param('id') id: string): Promise<BasketTotalDto> {
