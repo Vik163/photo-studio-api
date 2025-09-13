@@ -1,7 +1,7 @@
 import { StatusOrder } from 'src/order/dto/order.dto';
 
 export class OrdersUserDto {
-  userId: string;
+  deviceId: string;
   ordersUser: ResOrderUserDto[];
 }
 

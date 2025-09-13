@@ -7,7 +7,7 @@ export type OrderDocument = HydratedDocument<Order>;
 @Schema()
 export class Order {
   @Prop()
-  userId: string;
+  deviceId: string;
 
   @Prop()
   orders: OneOrderDto[];

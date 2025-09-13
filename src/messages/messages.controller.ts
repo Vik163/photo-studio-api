@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { Request, Response } from 'express';
-import { MailData, MessagesDto } from './dto/messages.dto';
+import { BodyMailDto, MailData } from './dto/messages.dto';
 
 @Controller('messages')
 export class MessagesController {
@@ -33,13 +33,27 @@ export class MessagesController {
     await this.messagesService.getMessages(res, token);
   }
 
-  // @Put('basket/:id')
-  // async decreaseBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.decreaseBasket(id);
-  // }
+  @Delete(':id')
+  async deleteMessage(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<void> {
+    const token: string = req.cookies.__order;
+    if (token) {
+      await this.messagesService.deleteMessage(res, token, id);
+    }
+  }
 
-  // @Delete('basket/:id')
-  // async deleteBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.deleteBasket(id);
-  // }
+  @Put()
+  async updateMessage(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Body() body: BodyMailDto,
+  ): Promise<void> {
+    const token: string = req.cookies.__order;
+    if (token) {
+      await this.messagesService.updateMessages(res, token, body);
+    }
+  }
 }

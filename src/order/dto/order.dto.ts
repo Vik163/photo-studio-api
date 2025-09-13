@@ -8,7 +8,7 @@ export type StatusOrder =
   | 'Завершён'; // удаление, готовое фото, скачивание
 
 export class OrderDto {
-  userId: string;
+  deviceId: string;
   orders: OneOrderDto[];
 }
 
@@ -17,7 +17,7 @@ export class BodyDto {
   name: string;
   phone: string;
   service: string;
-  message?: string;
+  mail?: string;
   images?: string[];
 }
 
@@ -26,7 +26,7 @@ export class OneOrderDto {
   name: string;
   phone: string;
   service: string;
-  message?: string;
+  mail?: string;
   images?: string[];
   completedImages?: string; // src сформированный fileReader  (хранится только в БД)
   status: StatusOrder;
@@ -37,7 +37,7 @@ export class OneOrderDto {
 export class ResOrdersDto {
   orderId: string;
   service: string;
-  message?: string;
+  mail?: string;
   completedImages?: string;
   status: StatusOrder;
 }

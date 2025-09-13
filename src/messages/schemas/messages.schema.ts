@@ -1,16 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { OneMessageDto } from '../dto/messages.dto';
+import { OneMailDto } from '../dto/messages.dto';
 
 export type MessageDocument = HydratedDocument<Message>;
 
 @Schema()
 export class Message {
   @Prop()
-  userId: string;
+  deviceId: string;
 
   @Prop()
-  messages: OneMessageDto[];
+  messages: OneMailDto[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

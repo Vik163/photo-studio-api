@@ -4,7 +4,7 @@ import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 
 interface TokenPayload {
-  userId: string;
+  deviceId: string;
   iat: number;
   exp: number;
 }
@@ -32,9 +32,9 @@ export class TokensService {
     return { adminToken, controlToken };
   }
 
-  async getToken(userId: string): Promise<string> {
-    if (userId) {
-      const payload = { userId };
+  async getToken(deviceId: string): Promise<string> {
+    if (deviceId) {
+      const payload = { deviceId };
 
       return await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('token_secret'),
@@ -50,7 +50,7 @@ export class TokensService {
     });
 
     if (payload) {
-      return payload.userId;
+      return payload.deviceId;
     } else {
       console.log('no');
       return 'no';
@@ -102,28 +102,4 @@ export class TokensService {
       .clearCookie('control_admin')
       .send({ message: 'Не авторизован' });
   }
-
-  //   async canActivate(
-  //   userId: string,
-  //   req: Request,
-  //   res: Response,
-  // ): Promise<boolean> {
-  //   const token: string = req.cookies.__order;
-
-  //   // const user: UserDto = await this.userService.findById(userId);
-  //   if (!token) {
-  //     console.log('no');
-  //   }
-  //   try {
-  //     const payload = await this.jwtService.verifyAsync(token, {
-  //       secret: this.configService.get<string>('token_secret'),
-  //     });
-  //     // 💡 We're assigning the payload to the request object here
-  //     // so that we can access it in our route handlers
-  //     payload;
-  //   } catch {
-  //     console.log('no');
-  //   }
-  //   return true;
-  // }
 }

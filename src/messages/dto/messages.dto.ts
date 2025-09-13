@@ -1,13 +1,13 @@
-export class MessagesDto {
-  userId: string;
-  messages: OneMessageDto[];
+export class MailDto {
+  deviceId: string;
+  messages: OneMailDto[];
 }
 
-export class OneMessageDto {
+export class OneMailDto {
   orderId: string;
   name: string;
   phone: string;
-  message: string;
+  mail: string;
   createdAt: Date;
   created: string;
 }
@@ -16,11 +16,10 @@ export interface MailData {
   orderId: string;
   name: string;
   phone: string;
-  message: string;
+  mail: string;
 }
 
-export class ResMessagesDto {
+export class BodyMailDto {
   orderId: string;
-  service: string;
-  message?: string;
+  mail: string;
 }

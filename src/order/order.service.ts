@@ -9,10 +9,11 @@ import { Request, Response } from 'express';
 import { BasketService } from './basket.service';
 import { getDates } from 'src/utils/lib/getDates';
 import { MessagesService } from 'src/messages/messages.service';
+import { ResMessages } from 'src/utils/constants/messages';
 
 @Injectable()
 export class OrderService {
-  userId: string;
+  deviceId: string;
   newOrder: OrderDto;
 
   constructor(
@@ -21,60 +22,114 @@ export class OrderService {
     private basketService: BasketService,
     private messagesService: MessagesService,
   ) {
-    this.userId = '';
+    this.deviceId = '';
     this.newOrder = null;
   }
 
+  /**
+   * Добавляет заказ в бд
+   * если есть токен, достаёт из токена id устройства и ищет существующие заказы под этим id. Добавляет новый
+   * если нет создает новый с id устройства
+   * отправляет данные клиенту или сообщение об ошибке
+   * @param body
+   * @param token - токен с id устройства
+   */
   async addOrder(res: Response, body: BodyDto, token?: string): Promise<void> {
     let existOrders: OrderDto = undefined;
 
     if (token) {
-      this.userId = await this.tokenService.getPayloadByCookie(token);
+      this.deviceId = await this.tokenService.getPayloadByCookie(token);
       existOrders =
-        (await this.basketService.getDataByUserId(this.userId)) || null;
+        (await this.basketService.getDataByDeviceId(this.deviceId)) || null;
     }
 
     if (existOrders) {
-      this.userId = existOrders.userId;
-      await this._updateOrder(res, existOrders, body);
+      const { date, dayAndMonth } = getDates();
+
+      this.deviceId = existOrders.deviceId;
+
+      const order: OneOrderDto = {
+        orderId: body.orderId,
+        name: body.name,
+        phone: body.phone,
+        mail: body.mail,
+        images: body.images,
+        service: body.service,
+        status: 'Создан',
+        createdAt: date,
+        created: dayAndMonth,
+      };
+
+      existOrders.orders.push(order);
+
+      await this._updateBD(
+        res,
+        existOrders.orders,
+        ResMessages.CREATE_ORDER_ERROR,
+      );
     } else {
       await this._createOrder(res, body);
     }
   }
 
-  async _updateOrder(res: Response, existOrders: OrderDto, body: BodyDto) {
-    const { date, dayAndMonth } = getDates();
-    const order: OneOrderDto = {
-      orderId: body.orderId,
-      name: body.name,
-      phone: body.phone,
-      message: body.message,
-      images: body.images,
-      service: body.service,
-      status: 'Создан',
-      createdAt: date,
-      created: dayAndMonth,
-    };
+  /**
+   * достаёт из токена id устройства и ищет существующие заказы под этим id.
+   * выбирает в найденных нужный по id заказа полученного из параметров запроса и удаяет его.
+   * отправляет данные клиенту или сообщение об ошибке
+   */
+  async deleteOrder(res: Response, token: string, orderId: string) {
+    const deviceId = await this.tokenService.getPayloadByCookie(token);
+    const data = await this.basketService.getDataByDeviceId(deviceId);
 
-    existOrders.orders.push(order);
+    if (data.orders.length < 2) {
+      this._deleteDataByDeviceId(res, deviceId);
+    } else {
+      data.orders = data.orders.filter((order) => order.orderId !== orderId);
 
-    await this._updateBD(res, existOrders.orders, 'Заказ успешно создан');
+      this._updateBD(res, data.orders, ResMessages.DELETE_ORDER_ERROR);
+    }
   }
 
+  /**
+   * достаёт из токена id устройства и ищет существующие заказы под этим id.
+   * выбирает в найденных нужное по id заказа полученного из параметров запроса и обновляет его.
+   * отправляет данные клиенту или сообщение об ошибке
+   */
+  async updateOrder(res: Response, body: BodyDto, token?: string) {
+    this.deviceId = await this.tokenService.getPayloadByCookie(token);
+    if (this.deviceId) {
+      const basket = await this.basketService.getDataByDeviceId(this.deviceId);
+      const orders = basket.orders;
+      const index = orders.findIndex((el) => el.orderId === body.orderId);
+
+      orders[index].images = body.images;
+      orders[index].mail = body.mail;
+      orders[index].service = body.service;
+
+      await this._updateBD(res, basket.orders, ResMessages.UPDATE_ORDER_ERROR);
+    }
+  }
+
+  /**
+   *  проверяет есть ли сохранненые сообщения по id устройства. если есть то id не меняется, если нет то создается новое
+   * создаёт заказ и отправляет данные клиенту
+   * @param res
+   * @param body
+   */
   async _createOrder(res: Response, body: BodyDto) {
     const { date, dayAndMonth } = getDates();
-    const messages = await this.messagesService.getMessagesByUserId(
-      this.userId,
+    const messages = await this.messagesService.getMessagesByDeviceId(
+      this.deviceId,
     );
-    this.userId = messages ? this.userId : uuidv4();
+    this.deviceId = messages ? this.deviceId : uuidv4();
     const order: OrderDto = {
-      userId: this.userId,
+      deviceId: this.deviceId,
       orders: [
         {
           orderId: body.orderId,
           name: body.name,
           phone: body.phone,
-          message: body.message,
+          mail: body.mail,
           images: body.images,
           service: body.service,
           status: 'Создан',
@@ -89,63 +144,43 @@ export class OrderService {
     this.basketService.sendBasketWithCookie(
       res,
       this.newOrder,
-      'Заказ успешно создан',
+      ResMessages.CREATE_ORDER_ERROR,
     );
   }
 
-  async _deleteDataByUserId(res: Response, userId: string) {
+  /**
+   * по id устройства удаляет заказ под этим id.
+   * проверяет сообщения по id устройства. Если есть то посылает клиенту сообщение об удалении, если нет то сначала удаляет cookie клиента
+   */
+  async _deleteDataByDeviceId(res: Response, deviceId: string) {
     const data = await this.orderModel
-      .findOneAndDelete({ userId: userId })
+      .findOneAndDelete({ deviceId: deviceId })
       .exec();
-    if (data) this.tokenService.deleteToken(res);
-    res.send({ message: 'Заказ успешно удалён' });
+
+    const messages = await this.messagesService.getMessagesByDeviceId(
+      this.deviceId,
+    );
+
+    if (!messages) this.tokenService.deleteToken(res);
+
+    if (data) {
+      res.send({ message: ResMessages.DELETE_ORDER_SUCCESS });
+    } else res.send({ message: ResMessages.DELETE_ORDER_ERROR });
   }
 
-  async deleteOrder(res: Response, token: string, orderId: string) {
-    const userId = await this.tokenService.getPayloadByCookie(token);
-    const data = await this.basketService.getDataByUserId(userId);
-
-    if (data.orders.length < 2) {
-      this._deleteDataByUserId(res, userId);
-    } else {
-      data.orders = data.orders.filter((order) => order.orderId !== orderId);
-
-      const createdData = new this.orderModel(data);
-
-      await createdData.updateOne();
-      this.newOrder = await createdData.save();
-
-      this.basketService.sendBasketWithCookie(
-        res,
-        this.newOrder,
-        'Заказ успешно удалён',
-      );
-    }
-  }
-
-  async updateOrder(res: Response, body: BodyDto, token?: string) {
-    const userId = await this.tokenService.getPayloadByCookie(token);
-    if (userId) {
-      const basket = await this.basketService.getDataByUserId(userId);
-      const orders = basket.orders;
-      const index = orders.findIndex((el) => el.orderId === body.orderId);
-
-      orders[index].images = body.images;
-      orders[index].message = body.message;
-      orders[index].service = body.service;
-
-      await this._updateBD(res, basket.orders, 'Заказ успешно изменён');
-    }
-  }
-
+  /**
+   * Обновляет в бд данные
+   * создает объект с новыми данными и обновляет бд по id устройства
+   * данные отправляет клиенту
+   */
   async _updateBD(res: Response, orders: OneOrderDto[], message: string) {
     const newData: OrderDto = {
-      userId: this.userId,
+      deviceId: this.deviceId,
       orders,
     };
 
     this.newOrder = await this.orderModel.findOneAndUpdate(
-      { userId: this.userId },
+      { deviceId: this.deviceId },
       newData,
     );
 

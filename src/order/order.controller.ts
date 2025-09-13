@@ -62,14 +62,4 @@ export class OrderController {
       return answer;
     } else return null;
   }
-
-  // @Put('basket/:id')
-  // async decreaseBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.decreaseBasket(id);
-  // }
-
-  // @Delete('basket/:id')
-  // async deleteBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.deleteBasket(id);
-  // }
 }

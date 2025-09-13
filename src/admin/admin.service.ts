@@ -17,7 +17,7 @@ import { getLeftDays } from 'src/utils/lib/getDates';
 
 @Injectable()
 export class AdminService {
-  userId: string;
+  deviceId: string;
   newOrder: OrderDto;
 
   constructor(
@@ -25,7 +25,7 @@ export class AdminService {
     private tokenService: TokensService,
     private basketService: BasketService,
   ) {
-    this.userId = '';
+    this.deviceId = '';
     this.newOrder = null;
   }
 
@@ -43,7 +43,7 @@ export class AdminService {
           leftDays,
         };
       });
-      return { userId: userOrders.userId, ordersUser: arrOrders };
+      return { deviceId: userOrders.deviceId, ordersUser: arrOrders };
     });
   }
 
@@ -55,20 +55,20 @@ export class AdminService {
     return selectData;
   }
 
-  async _deleteDataByUserId(res: Response, userId: string) {
+  async _deleteDataBydeviceId(res: Response, deviceId: string) {
     const data = await this.orderModel
-      .findOneAndDelete({ userId: userId })
+      .findOneAndDelete({ deviceId: deviceId })
       .exec();
     if (data) this.tokenService.deleteToken(res);
     res.send({ message: 'Заказ успешно удалён' });
   }
 
   async deleteOrder(res: Response, token: string, orderId: string) {
-    const userId = await this.tokenService.getPayloadByCookie(token);
-    const data = await this.basketService.getDataByUserId(userId);
+    const deviceId = await this.tokenService.getPayloadByCookie(token);
+    const data = await this.basketService.getDataByDeviceId(deviceId);
 
     if (data.orders.length < 2) {
-      this._deleteDataByUserId(res, userId);
+      this._deleteDataBydeviceId(res, deviceId);
     } else {
       data.orders = data.orders.filter((order) => order.orderId !== orderId);
 
@@ -86,14 +86,14 @@ export class AdminService {
   }
 
   async updateOrder(res: Response, body: BodyDto, token?: string) {
-    const userId = await this.tokenService.getPayloadByCookie(token);
-    if (userId) {
-      const basket = await this.basketService.getDataByUserId(userId);
+    const deviceId = await this.tokenService.getPayloadByCookie(token);
+    if (deviceId) {
+      const basket = await this.basketService.getDataByDeviceId(deviceId);
       const orders = basket.orders;
       const index = orders.findIndex((el) => el.orderId === body.orderId);
 
       orders[index].images = body.images;
-      orders[index].message = body.message;
+      orders[index].mail = body.mail;
       orders[index].service = body.service;
 
       const createdData = new this.orderModel(basket);
