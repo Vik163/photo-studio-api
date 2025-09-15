@@ -10,22 +10,30 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { BodyDto, OrderDto, ResOrdersDto } from '../order/dto/order.dto';
+import { BodyDto, OrderDto } from '../order/dto/order.dto';
 import { Request, Response } from 'express';
 import { BasketService } from '../order/basket.service';
-import { AdminService } from './admin.service';
+import { AdminOrderService } from './adminOrder.service';
 import { OrdersUserDto } from './dto/admin.dto';
+import { AdminMailService } from './adminMail.service';
+import { MailDto } from 'src/messages/dto/messages.dto';
 
 @Controller('admin')
 export class AdminController {
   constructor(
-    readonly adminService: AdminService,
+    readonly adminOrderService: AdminOrderService,
+    readonly adminMailService: AdminMailService,
     private basketService: BasketService,
   ) {}
 
   @Get('orders')
   async getOrders(): Promise<OrdersUserDto[]> {
-    return this.adminService.getOrders();
+    return this.adminOrderService.getOrders();
+  }
+
+  @Get('messages')
+  async getMails(): Promise<MailDto[]> {
+    return this.adminMailService.getMails();
   }
 
   @Put()
@@ -35,7 +43,7 @@ export class AdminController {
     @Body() body: BodyDto,
   ): Promise<void> {
     const token: string = req.cookies.__order;
-    await this.adminService.updateOrder(res, body, token);
+    await this.adminOrderService.updateOrder(res, body, token);
   }
 
   @Delete(':id')
@@ -46,7 +54,7 @@ export class AdminController {
   ): Promise<void> {
     const token: string = req.cookies.__order;
     if (token) {
-      await this.adminService.deleteOrder(res, token, id);
+      await this.adminOrderService.deleteOrder(res, token, id);
     }
   }
 

@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas/messages.schema';
 import { Model } from 'mongoose';
-import { BodyMailDto, MailData, MailDto, OneMailDto } from './dto/messages.dto';
+import {
+  UpdateMailDto,
+  MailData,
+  MailDto,
+  OneMailDto,
+} from './dto/messages.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { getDates } from 'src/utils/lib/getDates';
 import { TokensService } from 'src/token/tokens.service';
@@ -45,14 +50,13 @@ export class MessagesService {
     }
     if (existMessages) {
       this.deviceId = existMessages.deviceId;
-      const { date, dayAndMonth } = getDates();
+      const { dayAndMonth } = getDates();
 
       const order: OneMailDto = {
         orderId: body.orderId,
         name: body.name,
         phone: body.phone,
         mail: body.mail,
-        createdAt: date,
         created: dayAndMonth,
       };
 
@@ -95,7 +99,7 @@ export class MessagesService {
   async updateMessages(
     res: Response,
     token: string,
-    body: BodyMailDto,
+    body: UpdateMailDto,
   ): Promise<void> {
     const userId = await this.tokenService.getPayloadByCookie(token);
     if (userId) {
@@ -170,7 +174,7 @@ export class MessagesService {
   async _createMessages(res: Response, body: MailData): Promise<void> {
     const basket = await this.basketService.getBasketByDeviceId(this.deviceId);
     this.deviceId = basket ? this.deviceId : uuidv4();
-    const { date, dayAndMonth } = getDates();
+    const { dayAndMonth } = getDates();
     const MailDto: MailDto = {
       deviceId: this.deviceId,
       messages: [
@@ -179,7 +183,6 @@ export class MessagesService {
           name: body.name,
           phone: body.phone,
           mail: body.mail,
-          createdAt: date,
           created: dayAndMonth,
         },
       ],

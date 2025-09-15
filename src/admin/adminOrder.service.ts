@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import {
-  BodyDto,
-  OneOrderDto,
-  OrderDto,
-  ResOrdersDto,
-} from '../order/dto/order.dto';
+import { BodyDto, OrderDto } from '../order/dto/order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order } from '../order/schemas/order.schema';
-import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from 'src/token/tokens.service';
 import { Request, Response } from 'express';
 import { BasketService } from '../order/basket.service';
@@ -16,7 +10,7 @@ import { OrdersUserDto } from './dto/admin.dto';
 import { getLeftDays } from 'src/utils/lib/getDates';
 
 @Injectable()
-export class AdminService {
+export class AdminOrderService {
   deviceId: string;
   newOrder: OrderDto;
 
@@ -36,6 +30,8 @@ export class AdminService {
 
         return {
           orderId: order.orderId,
+          name: order.name,
+          phone: order.phone,
           service: order.service,
           completedImages: order.completedImages,
           status: order.status,

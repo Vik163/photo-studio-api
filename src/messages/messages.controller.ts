@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { Request, Response } from 'express';
-import { BodyMailDto, MailData } from './dto/messages.dto';
+import { UpdateMailDto, MailData } from './dto/messages.dto';
 
 @Controller('messages')
 export class MessagesController {
@@ -49,7 +49,7 @@ export class MessagesController {
   async updateMessage(
     @Res() res: Response,
     @Req() req: Request,
-    @Body() body: BodyMailDto,
+    @Body() body: UpdateMailDto,
   ): Promise<void> {
     const token: string = req.cookies.__order;
     if (token) {

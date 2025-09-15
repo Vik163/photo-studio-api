@@ -5,14 +5,22 @@ import { TokensService } from 'src/token/tokens.service';
 import { JwtModule } from '@nestjs/jwt';
 import { BasketService } from '../order/basket.service';
 import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
+import { AdminOrderService } from './adminOrder.service';
+import { AdminMailService } from './adminMail.service';
+import { Message, MessageSchema } from 'src/messages/schemas/messages.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
+    MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
     JwtModule.register({}),
   ],
   controllers: [AdminController],
-  providers: [AdminService, TokensService, BasketService],
+  providers: [
+    AdminOrderService,
+    AdminMailService,
+    TokensService,
+    BasketService,
+  ],
 })
 export class AdminModule {}

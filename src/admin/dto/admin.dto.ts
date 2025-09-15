@@ -2,13 +2,17 @@ import { StatusOrder } from 'src/order/dto/order.dto';
 
 export class OrdersUserDto {
   deviceId: string;
-  ordersUser: ResOrderUserDto[];
+  ordersUser: OneOrder[];
 }
 
-export class ResOrderUserDto {
+export interface OneOrder {
   orderId: string;
+  name: string;
+  phone: string;
   service: string;
-  completedImages?: string;
+  message?: string;
+  images?: string[];
+  completedImages?: string; // src сформированный fileReader  (хранится только в БД)
   status: StatusOrder;
   created: string;
   leftDays: number;
