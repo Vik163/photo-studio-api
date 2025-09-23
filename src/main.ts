@@ -24,13 +24,6 @@ async function bootstrap() {
 
   app.enableCors();
 
-  app.use(async (req, res, next) => {
-    await new Promise((res) => {
-      setTimeout(res, 800);
-    });
-    next();
-  });
-
   app.use(cookieParser());
 
   app.use(

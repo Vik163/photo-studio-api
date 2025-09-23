@@ -32,7 +32,7 @@ export class AdminController {
   }
 
   @Get('messages')
-  async getMails(): Promise<MailDto[]> {
+  async getMails(): Promise<OrdersUserDto[]> {
     return this.adminMailService.getMails();
   }
 

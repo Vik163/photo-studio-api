@@ -9,6 +9,7 @@ import { BasketService } from '../order/basket.service';
 import { OrdersUserDto } from './dto/admin.dto';
 import { getLeftDays } from 'src/utils/lib/getDates';
 import { Message } from 'src/messages/schemas/messages.schema';
+import { MailDto, OneMailDto } from 'src/messages/dto/messages.dto';
 
 @Injectable()
 export class AdminMailService {
@@ -24,30 +25,27 @@ export class AdminMailService {
     this.newOrder = null;
   }
 
-  _selectDataFromOrders(data: OrderDto[]): OrdersUserDto[] {
+  _selectDataFromOrders(data: MailDto[]): OrdersUserDto[] {
     return data.map((userOrders) => {
-      const arrOrders = userOrders.orders.map((order) => {
-        const leftDays = getLeftDays(order.createdAt, 15);
-
+      const arrOrders = userOrders.messages.map((order) => {
         return {
           orderId: order.orderId,
-          name: order.name,
+          userName: order.name,
           phone: order.phone,
-          service: order.service,
-          completedImages: order.completedImages,
-          status: order.status,
+          mail: order.mail,
           created: order.created,
-          leftDays,
         };
       });
-      return { deviceId: userOrders.deviceId, ordersUser: arrOrders };
+      return { deviceId: userOrders.deviceId, data: arrOrders };
     });
   }
 
   async getMails() {
-    const data = await this.mailModel.find().exec();
+    const data: MailDto[] = await this.mailModel.find().exec();
 
-    return data;
+    const selectData = this._selectDataFromOrders(data);
+
+    return selectData;
   }
 
   //   async _deleteDataBydeviceId(res: Response, deviceId: string) {

@@ -30,8 +30,9 @@ export class AdminOrderService {
 
         return {
           orderId: order.orderId,
-          name: order.name,
+          userName: order.name,
           phone: order.phone,
+          mail: order.mail,
           service: order.service,
           completedImages: order.completedImages,
           status: order.status,
@@ -39,7 +40,7 @@ export class AdminOrderService {
           leftDays,
         };
       });
-      return { deviceId: userOrders.deviceId, ordersUser: arrOrders };
+      return { deviceId: userOrders.deviceId, data: arrOrders };
     });
   }
 
