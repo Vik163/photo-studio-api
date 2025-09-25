@@ -33,6 +33,7 @@ export class AdminOrderService {
           userName: order.name,
           phone: order.phone,
           mail: order.mail,
+          images: order.images,
           service: order.service,
           completedImages: order.completedImages,
           status: order.status,
