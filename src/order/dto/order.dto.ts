@@ -23,12 +23,13 @@ export class BodyDto {
 
 export class OneOrderDto {
   orderId: string;
-  name: string;
+  userName: string;
   phone: string;
   service: string;
   mail?: string;
   images?: string[];
-  completedImages?: string; // src сформированный fileReader  (хранится только в БД)
+  mailAdmin?: string;
+  completedImages?: string[]; // src сформированный fileReader  (хранится только в БД)
   status: StatusOrder;
   createdAt: Date;
   created: string;
@@ -38,6 +39,7 @@ export class ResOrdersDto {
   orderId: string;
   service: string;
   mail?: string;
-  completedImages?: string;
+  mailAdmin?: string;
+  completedImages?: string[];
   status: StatusOrder;
 }

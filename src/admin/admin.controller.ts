@@ -14,7 +14,7 @@ import { BodyDto, OrderDto } from '../order/dto/order.dto';
 import { Request, Response } from 'express';
 import { BasketService } from '../order/basket.service';
 import { AdminOrderService } from './adminOrder.service';
-import { OrdersUserDto } from './dto/admin.dto';
+import { OneOrder, OrdersUserDto, UpdateData } from './dto/admin.dto';
 import { AdminMailService } from './adminMail.service';
 import { MailDto } from 'src/messages/dto/messages.dto';
 
@@ -37,13 +37,12 @@ export class AdminController {
   }
 
   @Put()
-  async updateOrder(
-    @Res() res: Response,
-    @Req() req: Request,
-    @Body() body: BodyDto,
-  ): Promise<void> {
-    const token: string = req.cookies.__order;
-    await this.adminOrderService.updateOrder(res, body, token);
+  async updateData(@Body() body: UpdateData): Promise<OneOrder> {
+    if (body.completedImages || body.status) {
+      return await this.adminOrderService.updateOrder(body);
+    } else {
+      return await this.adminMailService.updateMail(body);
+    }
   }
 
   @Delete(':id')
@@ -52,10 +51,7 @@ export class AdminController {
     @Req() req: Request,
     @Param('id') id: string,
   ): Promise<void> {
-    const token: string = req.cookies.__order;
-    if (token) {
-      await this.adminOrderService.deleteOrder(res, token, id);
-    }
+    await this.adminOrderService.deleteOrder(res, id);
   }
 
   // @Put('basket/:id')

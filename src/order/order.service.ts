@@ -50,7 +50,7 @@ export class OrderService {
 
       const order: OneOrderDto = {
         orderId: body.orderId,
-        name: body.name,
+        userName: body.name,
         phone: body.phone,
         mail: body.mail,
         images: body.images,
@@ -127,7 +127,7 @@ export class OrderService {
       orders: [
         {
           orderId: body.orderId,
-          name: body.name,
+          userName: body.name,
           phone: body.phone,
           mail: body.mail,
           images: body.images,

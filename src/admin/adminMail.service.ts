@@ -6,7 +6,7 @@ import { Order } from '../order/schemas/order.schema';
 import { TokensService } from 'src/token/tokens.service';
 import { Request, Response } from 'express';
 import { BasketService } from '../order/basket.service';
-import { OrdersUserDto } from './dto/admin.dto';
+import { OneOrder, OrdersUserDto, UpdateData } from './dto/admin.dto';
 import { getLeftDays } from 'src/utils/lib/getDates';
 import { Message } from 'src/messages/schemas/messages.schema';
 import { MailDto, OneMailDto } from 'src/messages/dto/messages.dto';
@@ -30,7 +30,7 @@ export class AdminMailService {
       const arrOrders = userOrders.messages.map((order) => {
         return {
           orderId: order.orderId,
-          userName: order.name,
+          userName: order.userName,
           phone: order.phone,
           mail: order.mail,
           created: order.created,
@@ -48,6 +48,37 @@ export class AdminMailService {
     return selectData;
   }
 
+  async _getMailsByDeviceId(deviceId: string): Promise<MailDto> {
+    const data: MailDto = await this.mailModel
+      .findOne({ deviceId: deviceId })
+      .exec();
+
+    return data;
+  }
+
+  async updateMail(body: UpdateData): Promise<OneOrder | undefined> {
+    this.deviceId = body.deviceId;
+    const mailsData = await this._getMailsByDeviceId(this.deviceId);
+    const messages = mailsData.messages;
+    const index = messages.findIndex((el) => el.orderId === body.orderId);
+
+    if (body.mailAdmin) messages[index].mailAdmin = body.mailAdmin;
+
+    const data = await this._updateBD(messages);
+    if (data) return messages[index];
+  }
+
+  async _updateBD(messages: OneMailDto[]) {
+    const newData: MailDto = {
+      deviceId: this.deviceId,
+      messages,
+    };
+
+    return await this.mailModel.findOneAndUpdate(
+      { deviceId: this.deviceId },
+      newData,
+    );
+  }
   //   async _deleteDataBydeviceId(res: Response, deviceId: string) {
   //     const data = await this.orderModel
   //       .findOneAndDelete({ deviceId: deviceId })

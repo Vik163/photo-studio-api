@@ -5,9 +5,10 @@ export class MailDto {
 
 export class OneMailDto {
   orderId: string;
-  name: string;
+  userName: string;
   phone: string;
   mail: string;
+  mailAdmin?: string;
   created: string;
 }
 

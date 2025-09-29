@@ -54,7 +54,7 @@ export class MessagesService {
 
       const order: OneMailDto = {
         orderId: body.orderId,
-        name: body.name,
+        userName: body.name,
         phone: body.phone,
         mail: body.mail,
         created: dayAndMonth,
@@ -143,7 +143,7 @@ export class MessagesService {
   _selectData(messages: MailDto) {
     const selectData = messages.messages.map((item) => {
       delete item.phone;
-      delete item.name;
+      delete item.userName;
 
       return item;
     });
@@ -180,7 +180,7 @@ export class MessagesService {
       messages: [
         {
           orderId: body.orderId,
-          name: body.name,
+          userName: body.name,
           phone: body.phone,
           mail: body.mail,
           created: dayAndMonth,
