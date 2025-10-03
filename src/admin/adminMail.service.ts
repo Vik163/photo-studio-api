@@ -33,6 +33,7 @@ export class AdminMailService {
           userName: order.userName,
           phone: order.phone,
           mail: order.mail,
+          mailAdmin: order.mailAdmin,
           created: order.created,
         };
       });

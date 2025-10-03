@@ -38,7 +38,8 @@ export class AdminController {
 
   @Put()
   async updateData(@Body() body: UpdateData): Promise<OneOrder> {
-    if (body.completedImages || body.status) {
+    const completedImages = body.completedImages;
+    if ((completedImages && completedImages.length > 0) || body.status) {
       return await this.adminOrderService.updateOrder(body);
     } else {
       return await this.adminMailService.updateMail(body);

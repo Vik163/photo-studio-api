@@ -33,6 +33,7 @@ export class AdminOrderService {
           userName: order.userName,
           phone: order.phone,
           mail: order.mail,
+          mailAdmin: order.mailAdmin,
           images: order.images,
           service: order.service,
           completedImages: order.completedImages,
@@ -53,6 +54,7 @@ export class AdminOrderService {
       userName: order.userName,
       phone: order.phone,
       mail: order.mail,
+      mailAdmin: order.mailAdmin,
       images: order.images,
       service: order.service,
       completedImages: order.completedImages,
@@ -67,6 +69,7 @@ export class AdminOrderService {
 
     const selectData = this._selectDataFromOrders(data);
 
+    console.log('selectData:', selectData);
     return selectData;
   }
 
@@ -97,6 +100,7 @@ export class AdminOrderService {
   }
 
   async updateOrder(body: UpdateData): Promise<OneOrder> {
+    console.log('body:', body);
     this.deviceId = body.deviceId;
     const basket = await this.basketService.getDataByDeviceId(this.deviceId);
     const orders = basket.orders;
