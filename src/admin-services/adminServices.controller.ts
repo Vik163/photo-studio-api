@@ -11,22 +11,21 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AdminServicesService } from './adminServices.service';
-import { AdminServicesDto } from './dto/services.dto';
+import { AdminServicesDto, BodyServiceDto } from './dto/services.dto';
 
 @Controller('admin')
 export class AdminServicesController {
   constructor(readonly servicesService: AdminServicesService) {}
 
   @Post('services')
-  async addService(@Body() body: AdminServicesDto): Promise<void> {
-    //  await this.messagesService.addMessage(body);
+  async addService(@Body() body: BodyServiceDto): Promise<BodyServiceDto> {
+    return await this.servicesService.addService(body);
   }
 
-  //   @Get()
-  //   async getMessages(@Res() res: Response, @Req() req: Request): Promise<void> {
-  //     const token: string = req.cookies.__order;
-  //     await this.messagesService.getMessages(res, token);
-  //   }
+  @Get('services')
+  async getMessages(): Promise<AdminServicesDto | string> {
+    return await this.servicesService.getServices();
+  }
 
   //   @Delete(':id')
   //   async deleteMessage(

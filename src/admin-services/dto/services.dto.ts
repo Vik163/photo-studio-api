@@ -9,7 +9,12 @@ export type AdminServicesDto = {
 };
 
 export class AdminOneServiceDto {
-  service?: string;
-  image?: string;
+  service: string;
+  price?: number;
+}
+
+export class BodyServiceDto {
+  type: TypeServices;
+  service: string;
   price?: number;
 }

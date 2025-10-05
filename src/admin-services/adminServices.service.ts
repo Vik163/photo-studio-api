@@ -11,14 +11,19 @@ import { Services } from './schemas/services.schema';
 import {
   AdminOneServiceDto,
   AdminServicesDto,
+  BodyServiceDto,
   TypeServices,
 } from './dto/services.dto';
 
 @Injectable()
 export class AdminServicesService {
+  newService: BodyServiceDto;
+
   constructor(
     @InjectModel(Services.name) private servicesModel: Model<Services>,
-  ) {}
+  ) {
+    this.newService = null;
+  }
 
   /**
    * Добавляет сообщение в бд
@@ -28,18 +33,29 @@ export class AdminServicesService {
    * @param body
    * @param token - токен с id устройства
    */
-  async addService(body: AdminServicesDto): Promise<void> {
-    const newData: AdminOneServiceDto = {
-      type: body.type,
-      service: body.service,
-      price: body.price,
-      image: body.image,
-    };
+  async addService(body: BodyServiceDto): Promise<BodyServiceDto> {
+    this.newService = body;
+    const existServices = await this.getServicesByName(body.type);
 
-    const createdData = new this.servicesModel(newData);
-    const res = await createdData.save();
+    if (existServices) {
+      this._updateBD(existServices, ResMessages.CREATE_SERVICE_ERROR);
+    } else {
+      const newData: AdminServicesDto = {
+        [body.type]: [
+          {
+            service: body.service,
+            price: body.price,
+          },
+        ],
+      };
 
-    return res;
+      const createdData = new this.servicesModel(newData);
+      const res = await createdData.save();
+
+      if (res) {
+        return this.newService;
+      }
+    }
   }
 
   /**
@@ -88,12 +104,13 @@ export class AdminServicesService {
    * достаёт из токена id устройства и полчает существующие сообщения под этим id.
    * отправляет данные клиенту или сообщение об ошибке
    */
-  //   async getMessages(res: Response, token?: string): Promise<void> {
-  //     if (token) {
-  //       this.deviceId = await this.tokenService.getPayloadByCookie(token);
-  //       this._sendResponseWithCookie(res, 'Сообщения не найдены');
-  //     }
-  //   }
+  async getServices(): Promise<AdminServicesDto | string> {
+    const services = await this.servicesModel.find().exec();
+
+    if (services) {
+      return services[0];
+    } else return ResMessages.GET_SERVICE_ERROR;
+  }
 
   /**
    * по id устройства и полчает существующие сообщения под этим id.
@@ -128,15 +145,25 @@ export class AdminServicesService {
    * создает объект с новыми данными и обновляет бд по id устройства
    * данные отправляет клиенту
    */
-  //   async _updateBD(res: Response, messages: OneMailDto[], message: string) {
-  //     const newData: MailDto = {
-  //       deviceId: this.deviceId,
-  //       messages,
-  //     };
-  //     this.newMessage = await this.messageModel.findOneAndUpdate(
-  //       { deviceId: this.deviceId },
-  //       newData,
-  //     );
-  //     this._sendResponseWithCookie(res, message);
-  //   }
+  async _updateBD(services: AdminServicesDto, message: string) {
+    const arrServices = services[this.newService.type];
+
+    arrServices.forEach((item) => {
+      if (item.service === this.newService.service) {
+        item.service = this.newService.service;
+        item.price = this.newService.price || item.price;
+      }
+    });
+
+    const res = await this.servicesModel.findOneAndUpdate(
+      { [this.newService.type]: this.newService.type },
+      { [this.newService.type]: arrServices },
+    );
+
+    if (res) {
+      return res;
+    } else {
+      return message;
+    }
+  }
 }

@@ -1,4 +1,8 @@
 export enum ResMessages {
+  GET_SERVICE_ERROR = 'Данные по услугам не получены',
+  DELETE_SERVICE_ERROR = 'Новую услугу не получилось удалить',
+  UPDATE_SERVICE_ERROR = 'Новую услугу не получилось обновить',
+  CREATE_SERVICE_ERROR = 'Новую услугу не получилось создать',
   CREATE_ORDER_SUCCESS = 'Заказ успешно создан!',
   CREATE_ORDER_ERROR = 'Заказ не получилось создать',
   UPDATE_ORDER_SUCCESS = 'Заказ успешно изменён!',

@@ -69,7 +69,6 @@ export class AdminOrderService {
 
     const selectData = this._selectDataFromOrders(data);
 
-    console.log('selectData:', selectData);
     return selectData;
   }
 
