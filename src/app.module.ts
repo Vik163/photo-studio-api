@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
+import { AdminServicesModule } from './admin-services/adminServices.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AdminModule } from './admin/admin.module';
     AdminModule,
     OrderModule,
     MessagesModule,
+    AdminServicesModule,
   ],
 })
 export class AppModule {}
