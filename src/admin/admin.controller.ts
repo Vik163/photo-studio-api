@@ -54,14 +54,4 @@ export class AdminController {
   ): Promise<void> {
     await this.adminOrderService.deleteOrder(res, id);
   }
-
-  // @Put('basket/:id')
-  // async decreaseBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.decreaseBasket(id);
-  // }
-
-  // @Delete('basket/:id')
-  // async deleteBasket(@Param('id') id: string): Promise<BasketTotalDto> {
-  //   return this.orderService.deleteBasket(id);
-  // }
 }

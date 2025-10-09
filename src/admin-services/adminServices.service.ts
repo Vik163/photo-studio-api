@@ -26,23 +26,31 @@ export class AdminServicesService {
   }
 
   /**
-   * Добавляет сообщение в бд
-   * если есть токен, достаёт из токена id устройства и ищет существующие сообщения под этим id. Добавляет новое
-   * если нет создает новое с id устройства
+   * РЕдактирует услугу
+   * если нет в бд, то добавляет, если есть меняет цену (ищет по id услуги).
+   * ищет по id услуги
    * отправляет данные клиенту или сообщение об ошибке
    * @param body
-   * @param token - токен с id устройства
    */
-  async addService(body: BodyServiceDto): Promise<BodyServiceDto> {
+  async editService(body: BodyServiceDto): Promise<BodyServiceDto> {
     this.newService = body;
+    const id = uuidv4();
+    this.newService.id = body.id ? body.id : id;
     const existServices = await this.getServicesByName(body.type);
 
     if (existServices) {
-      this._updateBD(existServices, ResMessages.CREATE_SERVICE_ERROR);
+      const updateData = await this._updateBD(
+        existServices,
+        ResMessages.CREATE_SERVICE_ERROR,
+      );
+
+      if (updateData) return this.newService;
     } else {
       const newData: AdminServicesDto = {
-        [body.type]: [
+        type: body.type,
+        services: [
           {
+            id,
             service: body.service,
             price: body.price,
           },
@@ -59,64 +67,43 @@ export class AdminServicesService {
   }
 
   /**
-   * достаёт из токена id устройства и ищет существующие сообщения под этим id.
-   * выбирает в найденных нужное по id заказа полученного из параметров запроса и удаяет его.
-   * отправляет данные клиенту или сообщение об ошибке
+   * Удаляет по id (id услуги) и query (тип блока) параметрам.
+   * возвращает 'ok' или null
    */
-  //   async deleteMessage(res: Response, token: string, orderId: string) {
-  //     this.deviceId = await this.tokenService.getPayloadByCookie(token);
-  //     const data = await this.getMessagesByDeviceId(this.deviceId);
+  async deleteService(
+    query: { type: TypeServices },
+    serviceId: string,
+  ): Promise<string | null> {
+    const data = await this.getServicesByName(query.type);
+    const services = data.services;
 
-  //     if (data.messages.length < 2) {
-  //       this._deleteDataByDeviceId(res);
-  //     } else {
-  //       data.messages = data.messages.filter(
-  //         (message) => message.orderId !== orderId,
-  //       );
-  //       await this._updateBD(res, data.messages, ResMessages.DELETE_MAIL_ERROR);
-  //     }
-  //   }
+    const newServices = services.filter((item) => item.id !== serviceId);
 
-  /**
-   * достаёт из токена id устройства и ищет существующие сообщения под этим id.
-   * выбирает в найденных нужное по id заказа полученного из параметров запроса и обновляет его.
-   * отправляет данные клиенту или сообщение об ошибке
-   */
-  //   async updateMessages(
-  //     res: Response,
-  //     token: string,
-  //     body: UpdateMailDto,
-  //   ): Promise<void> {
-  //     const userId = await this.tokenService.getPayloadByCookie(token);
-  //     if (userId) {
-  //       const data = await this.getMessagesByDeviceId(userId);
+    const res = await this.servicesModel.findOneAndUpdate(
+      { type: query.type },
+      { services: newServices },
+    );
 
-  //       const messages = data.messages;
-  //       const index = messages.findIndex((el) => el.orderId === body.orderId);
+    if (res) {
+      return 'ok';
+    } else {
+      return null;
+    }
+  }
 
-  //       messages[index].mail = body.mail;
-
-  //       await this._updateBD(res, data.messages, ResMessages.UPDATE_MAIL_ERROR);
-  //     }
-  //   }
-
-  /**
-   * достаёт из токена id устройства и полчает существующие сообщения под этим id.
-   * отправляет данные клиенту или сообщение об ошибке
-   */
-  async getServices(): Promise<AdminServicesDto | string> {
+  async getServices(): Promise<AdminServicesDto[] | string> {
     const services = await this.servicesModel.find().exec();
 
     if (services) {
-      return services[0];
+      return services;
     } else return ResMessages.GET_SERVICE_ERROR;
   }
 
   /**
-   * по id устройства и полчает существующие сообщения под этим id.
+   * по типу "photo-na-dokumenty" | "photo-restavraciya" | "photo-dizain" | "ritual-photo".
    */
   async getServicesByName(name: TypeServices): Promise<AdminServicesDto> {
-    const services = await this.servicesModel.findOne({ [name]: name }).exec();
+    const services = await this.servicesModel.findOne({ type: name }).exec();
 
     if (services) {
       return services;
@@ -124,40 +111,32 @@ export class AdminServicesService {
   }
 
   /**
-   * по id устройства удаляет сообщения под этим id.
-   * проверяет корзину заказов по id устройства. Если есть то посылает клиенту сообщение, если нет то сначала удаляет cookie клиента
-   */
-  //   async _deleteDataByDeviceId(res: Response) {
-  //     const data = await this.messageModel
-  //       .findOneAndDelete({ deviceId: this.deviceId })
-  //       .exec();
-
-  //     const basket = await this.basketService.getDataByDeviceId(this.deviceId);
-
-  //     if (!basket) this.tokenService.deleteToken(res);
-  //     if (data) {
-  //       res.send({ message: ResMessages.DELETE_MAIL_SUCCESS });
-  //     } else res.send({ message: ResMessages.DELETE_MAIL_ERROR });
-  //   }
-
-  /**
    * Обновляет в бд данные
    * создает объект с новыми данными и обновляет бд по id устройства
-   * данные отправляет клиенту
+   * данные отправляет клиенту, либо сообщение об ошибке
    */
   async _updateBD(services: AdminServicesDto, message: string) {
-    const arrServices = services[this.newService.type];
+    let isExist = false;
+
+    const arrServices = services.services;
 
     arrServices.forEach((item) => {
-      if (item.service === this.newService.service) {
-        item.service = this.newService.service;
+      if (item.id === this.newService.id) {
         item.price = this.newService.price || item.price;
+        isExist = true;
       }
     });
 
+    if (!isExist)
+      arrServices.push({
+        id: this.newService.id,
+        service: this.newService.service,
+        price: this.newService.price,
+      });
+
     const res = await this.servicesModel.findOneAndUpdate(
-      { [this.newService.type]: this.newService.type },
-      { [this.newService.type]: arrServices },
+      { type: services.type },
+      { services: arrServices },
     );
 
     if (res) {

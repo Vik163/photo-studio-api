@@ -78,15 +78,15 @@ export class OrderService {
    * отправляет данные клиенту или сообщение об ошибке
    */
   async deleteOrder(res: Response, token: string, orderId: string) {
-    const deviceId = await this.tokenService.getPayloadByCookie(token);
-    const data = await this.basketService.getDataByDeviceId(deviceId);
+    this.deviceId = await this.tokenService.getPayloadByCookie(token);
+    const data = await this.basketService.getDataByDeviceId(this.deviceId);
 
     if (data.orders.length < 2) {
-      this._deleteDataByDeviceId(res, deviceId);
+      this._deleteDataByDeviceId(res, this.deviceId);
     } else {
       data.orders = data.orders.filter((order) => order.orderId !== orderId);
 
-      this._updateBD(res, data.orders, ResMessages.DELETE_ORDER_ERROR);
+      await this._updateBD(res, data.orders, ResMessages.DELETE_ORDER_ERROR);
     }
   }
 
@@ -105,6 +105,9 @@ export class OrderService {
       orders[index].images = body.images;
       orders[index].mail = body.mail;
       orders[index].service = body.service;
+      orders[index].status = 'Создан';
+      orders[index].mailAdmin = '';
+      orders[index].completedImages = [];
 
       await this._updateBD(res, basket.orders, ResMessages.UPDATE_ORDER_ERROR);
     }

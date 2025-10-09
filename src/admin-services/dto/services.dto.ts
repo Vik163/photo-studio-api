@@ -2,19 +2,22 @@ export type TypeServices =
   | 'photo-na-dokumenty'
   | 'photo-restavraciya'
   | 'photo-dizain'
-  | 'retual-photo';
+  | 'ritual-photo';
 
 export type AdminServicesDto = {
-  [key in TypeServices]?: AdminOneServiceDto[];
+  type: TypeServices;
+  services: AdminOneServiceDto[];
 };
 
 export class AdminOneServiceDto {
+  id: string;
   service: string;
-  price?: number;
+  price?: string;
 }
 
 export class BodyServiceDto {
   type: TypeServices;
+  id: string;
   service: string;
-  price?: number;
+  price?: string;
 }

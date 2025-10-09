@@ -1,22 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { AdminOneServiceDto } from '../dto/services.dto';
+import { AdminOneServiceDto, TypeServices } from '../dto/services.dto';
 
 export type ServicesDocument = HydratedDocument<Services>;
 
 @Schema()
 export class Services {
   @Prop()
-  'photo-na-dokumenty'?: AdminOneServiceDto[];
+  type: TypeServices;
 
   @Prop()
-  'photo-restavraciya'?: AdminOneServiceDto[];
-
-  @Prop()
-  'photo-dizain'?: AdminOneServiceDto[];
-
-  @Prop()
-  'retual-photo'?: AdminOneServiceDto[];
+  services: AdminOneServiceDto[];
 }
 
 export const ServicesSchema = SchemaFactory.createForClass(Services);
