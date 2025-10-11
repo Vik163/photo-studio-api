@@ -11,7 +11,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { BodyDto, ResOrdersDto } from './dto/order.dto';
+import { BodyDto, OneOrderDto, ResOrdersDto } from './dto/order.dto';
 import { Request, Response } from 'express';
 import { BasketService } from './basket.service';
 
@@ -43,15 +43,8 @@ export class OrderController {
   }
 
   @Delete(':id')
-  async deleteOrder(
-    @Res() res: Response,
-    @Req() req: Request,
-    @Param('id') id: string,
-  ): Promise<void> {
-    const token: string = req.cookies.__order;
-    if (token) {
-      await this.orderService.deleteOrder(res, token, id);
-    }
+  async deleteOrder(@Param('id') id: string): Promise<OneOrderDto | null> {
+    return await this.orderService.deleteOrder(id);
   }
 
   @Get('basket')

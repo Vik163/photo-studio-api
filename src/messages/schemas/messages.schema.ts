@@ -10,7 +10,22 @@ export class Message {
   deviceId: string;
 
   @Prop()
-  messages: OneMailDto[];
+  orderId: string;
+
+  @Prop()
+  userName: string;
+
+  @Prop()
+  phone: string;
+
+  @Prop()
+  mail: string;
+
+  @Prop()
+  mailAdmin?: string;
+
+  @Prop()
+  created: string;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

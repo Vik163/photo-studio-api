@@ -16,8 +16,8 @@ export class BasketService {
   /**
    * Находит заказы по id устройства
    */
-  async getDataByDeviceId(deviceId: string): Promise<OrderDto> {
-    const data = await this.orderModel.findOne({ deviceId: deviceId }).exec();
+  async getDataByDeviceId(deviceId: string): Promise<OneOrderDto[]> {
+    const data = await this.orderModel.find({ deviceId }).exec();
     return data;
   }
 
@@ -26,8 +26,8 @@ export class BasketService {
    * @param order
    * @returns
    */
-  _selectData(order: Order) {
-    const selectData = order.orders.map((item) => {
+  _selectData(orders: OneOrderDto[]) {
+    const selectData = orders.map((item) => {
       delete item.phone;
 
       return item;
@@ -38,10 +38,10 @@ export class BasketService {
   /**
    * Находит заказы по id устройства и фильтрует данные для отправки клиенту
    */
-  async getBasketByDeviceId(deviceId: string): Promise<OneOrderDto[]> {
-    const order = await this.getDataByDeviceId(deviceId);
-    if (order) {
-      const selectData = this._selectData(order);
+  async getSelectDataByDeviceId(deviceId: string): Promise<OneOrderDto[]> {
+    const orders = await this.getDataByDeviceId(deviceId);
+    if (orders) {
+      const selectData = this._selectData(orders);
       return selectData;
     } else return null;
   }
@@ -54,20 +54,15 @@ export class BasketService {
    */
   async sendBasketWithCookie(
     res: Response,
-    newOrder: OrderDto,
+    newOrder: OneOrderDto,
     message: string,
   ) {
     if (newOrder) {
-      const order = await this.getBasketByDeviceId(newOrder.deviceId);
+      await this.tokenService.sendToken(res, newOrder.deviceId);
 
-      const response = await this.tokenService.sendToken(
-        res,
-        newOrder.deviceId,
-      );
-      if (response) {
-        res.send(order);
-      } else res.send({ message });
-    }
+      console.log('newOrder:', newOrder);
+      res.send(newOrder);
+    } else res.send({ message });
   }
 
   /**
@@ -76,7 +71,7 @@ export class BasketService {
   async getBasket(token: string): Promise<ResOrdersDto[]> {
     const deviceId = await this.tokenService.getPayloadByCookie(token);
     if (deviceId) {
-      return await this.getBasketByDeviceId(deviceId);
+      return await this.getSelectDataByDeviceId(deviceId);
     }
   }
 }

@@ -6,7 +6,12 @@ import { Order } from '../order/schemas/order.schema';
 import { TokensService } from 'src/token/tokens.service';
 import { Request, Response } from 'express';
 import { BasketService } from '../order/basket.service';
-import { OneOrder, OrdersUserDto, UpdateData } from './dto/admin.dto';
+import {
+  DataCancelOrder,
+  OneOrder,
+  OrdersUserDto,
+  UpdateData,
+} from './dto/admin.dto';
 import { getLeftDays } from 'src/utils/lib/getDates';
 
 @Injectable()
@@ -23,124 +28,135 @@ export class AdminOrderService {
     this.newOrder = null;
   }
 
-  _selectDataFromOrders(data: OrderDto[]): OrdersUserDto[] {
-    return data.map((userOrders) => {
-      const arrOrders = userOrders.orders.map((order) => {
-        const leftDays = getLeftDays(order.createdAt, 15);
+  // _selectDataFromOrders(data: OrderDto[]): OrdersUserDto[] {
+  //   return data.map((userOrders) => {
+  //     const arrOrders = userOrders.orders.map((order) => {
+  //       const leftDays = order.createdAt ? getLeftDays(order.createdAt, 15) : 0;
 
-        return {
-          orderId: order.orderId,
-          userName: order.userName,
-          phone: order.phone,
-          mail: order.mail,
-          mailAdmin: order.mailAdmin,
-          images: order.images,
-          service: order.service,
-          completedImages: order.completedImages,
-          status: order.status,
-          created: order.created,
-          leftDays,
-        };
-      });
-      return { deviceId: userOrders.deviceId, data: arrOrders };
-    });
-  }
+  //       return {
+  //         orderId: order.orderId,
+  //         userName: order.userName || '',
+  //         phone: order.phone || '',
+  //         mail: order.mail || '',
+  //         mailAdmin: order.mailAdmin,
+  //         images: order.images || null,
+  //         service: order.service,
+  //         completedImages: order.completedImages || null,
+  //         status: order.status,
+  //         created: order.created,
+  //         leftDays,
+  //       };
+  //     });
+  //     return { deviceId: userOrders.deviceId, data: arrOrders };
+  //   });
+  // }
 
-  _selectDataFromOneOrder(order: OneOrderDto): OneOrder {
-    const leftDays = getLeftDays(order.createdAt, 15);
+  // _selectDataFromOneOrder(order: OneOrderDto): OneOrder {
+  //   const leftDays = getLeftDays(order.createdAt, 15);
 
-    return {
-      orderId: order.orderId,
-      userName: order.userName,
-      phone: order.phone,
-      mail: order.mail,
-      mailAdmin: order.mailAdmin,
-      images: order.images,
-      service: order.service,
-      completedImages: order.completedImages,
-      status: order.status,
-      created: order.created,
-      leftDays,
-    };
-  }
+  //   return {
+  //     orderId: order.orderId,
+  //     userName: order.userName,
+  //     phone: order.phone,
+  //     mail: order.mail,
+  //     mailAdmin: order.mailAdmin,
+  //     images: order.images,
+  //     service: order.service,
+  //     completedImages: order.completedImages,
+  //     status: order.status,
+  //     created: order.created,
+  //     leftDays,
+  //   };
+  // }
+  // _setDataCancelOrder(order: OneOrderDto, mailAdmin: string): DataCancelOrder {
+  //   let expireAt = new Date();
+  //   expireAt.setMinutes(expireAt.getMinutes() + Math.round(Math.random() * 10));
+  //   return {
+  //     deviceId: order.deviceId,
+  //     orderId: order.orderId,
+  //     mailAdmin,
+  //     service: order.service,
+  //     status: 'Отменён',
+  //     created: order.created,
+  //     expireAt: 1,
+  //   };
+  // }
 
-  async getOrders() {
-    const data = await this.orderModel.find().exec();
+  // async getOrders() {
+  //   const data = await this.orderModel.find().exec();
 
-    const selectData = this._selectDataFromOrders(data);
+  //   // const selectData = this._selectDataFromOrders(data);
 
-    return selectData;
-  }
+  //   return data;
+  // }
 
-  async _deleteDataBydeviceId(res: Response, deviceId: string) {
-    const data = await this.orderModel
-      .findOneAndDelete({ deviceId: deviceId })
-      .exec();
-    if (data) this.tokenService.deleteToken(res);
-    res.send({ message: 'Заказ успешно удалён' });
-  }
+  // async cancelOrder(
+  //   body: { deviceId: string; mailAdmin: string },
+  //   orderId: string,
+  // ) {
+  //   this.deviceId = body.deviceId;
+  //   const basket = await this.basketService.getDataByDeviceId(this.deviceId);
+  //   const orders = basket;
 
-  async deleteOrder(res: Response, orderId: string) {
-    // const deviceId = await this.tokenService.getPayloadByCookie(token);
-    // const data = await this.basketService.getDataByDeviceId(deviceId);
-    // if (data.orders.length < 2) {
-    //   this._deleteDataBydeviceId(res, deviceId);
-    // } else {
-    //   data.orders = data.orders.filter((order) => order.orderId !== orderId);
-    //   const createdData = new this.orderModel(data);
-    //   await createdData.updateOne();
-    //   this.newOrder = await createdData.save();
-    //   this.basketService.sendBasketWithCookie(
-    //     res,
-    //     this.newOrder,
-    //     'Заказ успешно удалён',
-    //   );
-    // }
-  }
+  //   const newOrders = orders.map((item) => {
+  //     if (item.orderId === orderId) {
+  //       item = this._setDataCancelOrder(item, body.mailAdmin);
+  //     }
+  //     return item;
+  //   });
+  //   console.log('newOrders:', newOrders);
 
-  async updateOrder(body: UpdateData): Promise<OneOrder> {
-    console.log('body:', body);
-    this.deviceId = body.deviceId;
-    const basket = await this.basketService.getDataByDeviceId(this.deviceId);
-    const orders = basket.orders;
-    const index = orders.findIndex((el) => el.orderId === body.orderId);
-    const imgBody = body.completedImages;
-    // добавляет новые либо удаляет существующие значения
-    if (imgBody) {
-      let images = orders[index].completedImages;
-      if (images) {
-        if (images.length === 0) {
-          images = imgBody;
-        } else {
-          imgBody.forEach((i) => {
-            if (images.includes(i)) {
-              images = images.filter((v) => v !== i);
-            } else {
-              images.push(i);
-            }
-          });
-        }
-        orders[index].completedImages = images;
-      } else orders[index].completedImages = imgBody;
-    }
+  //   const res = await this.orderModel.findOneAndUpdate(
+  //     { deviceId: this.deviceId },
+  //     { orders: newOrders },
+  //   );
+  //   if (res) return 'ok';
 
-    if (body.mailAdmin) orders[index].mailAdmin = body.mailAdmin;
-    if (body.status) orders[index].status = body.status;
+  //   return null;
+  // }
 
-    const data = await this._updateBD(orders);
-    const selectData = this._selectDataFromOneOrder(orders[index]);
-    if (data) return selectData;
-  }
+  // async updateOrder(body: UpdateData): Promise<OneOrder> {
+  //   this.deviceId = body.deviceId;
+  //   const basket = await this.basketService.getDataByDeviceId(this.deviceId);
+  //   const orders = basket;
+  //   const index = orders.findIndex((el) => el.orderId === body.orderId);
+  //   const imgBody = body.completedImages;
+  //   // добавляет новые либо удаляет существующие значения
+  //   if (imgBody) {
+  //     let images = orders[index].completedImages;
+  //     if (images) {
+  //       if (images.length === 0) {
+  //         images = imgBody;
+  //       } else {
+  //         imgBody.forEach((i) => {
+  //           if (images.includes(i)) {
+  //             images = images.filter((v) => v !== i);
+  //           } else {
+  //             images.push(i);
+  //           }
+  //         });
+  //       }
+  //       orders[index].completedImages = images;
+  //     } else orders[index].completedImages = imgBody;
+  //   }
 
-  async _updateBD(orders: OneOrderDto[]) {
-    const newData: OrderDto = {
-      deviceId: this.deviceId,
-      orders,
-    };
+  //   if (body.mailAdmin) orders[index].mailAdmin = body.mailAdmin;
+  //   if (body.status) orders[index].status = body.status;
 
-    return await this.orderModel.findOneAndUpdate(
-      { deviceId: this.deviceId },
-      newData,
-    );
-  }
+  //   const data = await this._updateBD(orders);
+  //   const selectData = this._selectDataFromOneOrder(orders[index]);
+  //   if (data) return selectData;
+  // }
+
+  // async _updateBD(orders: OneOrderDto[]) {
+  //   const newData: OrderDto = {
+  //     deviceId: this.deviceId,
+  //     orders,
+  //   };
+
+  //   return await this.orderModel.findOneAndUpdate(
+  //     { deviceId: this.deviceId },
+  //     newData,
+  //   );
+  // }
 }

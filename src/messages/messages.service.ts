@@ -13,12 +13,12 @@ import { getDates } from 'src/utils/lib/getDates';
 import { TokensService } from 'src/token/tokens.service';
 import { Response } from 'express';
 import { BasketService } from 'src/order/basket.service';
-import { ResMessages } from 'src/utils/constants/messages';
+import { Messages } from 'src/utils/constants/messages';
 
 @Injectable()
 export class MessagesService {
   deviceId: string;
-  newMessage: MailDto;
+  newMessage: OneMailDto;
 
   constructor(
     @InjectModel(Message.name) private messageModel: Model<Message>,
@@ -42,34 +42,31 @@ export class MessagesService {
     body: MailData,
     token?: string,
   ): Promise<void> {
-    let existMessages: MailDto = undefined;
-
     if (token) {
-      this.deviceId = await this.tokenService.getPayloadByCookie(token);
-      existMessages = (await this.getMessagesByDeviceId(this.deviceId)) || null;
-    }
-    if (existMessages) {
-      this.deviceId = existMessages.deviceId;
-      const { dayAndMonth } = getDates();
+      const payload = await this.tokenService.getPayloadByCookie(token);
 
-      const order: OneMailDto = {
-        orderId: body.orderId,
-        userName: body.name,
-        phone: body.phone,
-        mail: body.mail,
-        created: dayAndMonth,
-      };
+      if (payload) {
+        this.deviceId = payload;
+      } else this.deviceId = uuidv4();
+    } else this.deviceId = uuidv4();
 
-      existMessages.messages.push(order);
+    const { dayAndMonth } = getDates();
+    const MailDto: OneMailDto = {
+      deviceId: this.deviceId,
+      orderId: body.orderId,
+      userName: body.name,
+      phone: body.phone,
+      mail: body.mail,
+      created: dayAndMonth,
+    };
+    const createdData = new this.messageModel(MailDto);
+    this.newMessage = await createdData.save();
 
-      await this._updateBD(
-        res,
-        existMessages.messages,
-        ResMessages.CREATE_MAIL_ERROR,
-      );
-    } else {
-      await this._createMessages(res, body);
-    }
+    this._sendResponseWithCookie(
+      res,
+      Messages.CREATE_MAIL_ERROR,
+      this.newMessage,
+    );
   }
 
   /**
@@ -77,17 +74,15 @@ export class MessagesService {
    * выбирает в найденных нужное по id заказа полученного из параметров запроса и удаяет его.
    * отправляет данные клиенту или сообщение об ошибке
    */
-  async deleteMessage(res: Response, token: string, orderId: string) {
-    this.deviceId = await this.tokenService.getPayloadByCookie(token);
-    const data = await this.getMessagesByDeviceId(this.deviceId);
+  async deleteMessage(orderId: string): Promise<OneMailDto | null> {
+    const message = await this.messageModel
+      .findOneAndDelete({ orderId })
+      .exec();
 
-    if (data.messages.length < 2) {
-      this._deleteDataByDeviceId(res);
+    if (message) {
+      return message;
     } else {
-      data.messages = data.messages.filter(
-        (message) => message.orderId !== orderId,
-      );
-      await this._updateBD(res, data.messages, ResMessages.DELETE_MAIL_ERROR);
+      return null;
     }
   }
 
@@ -96,22 +91,12 @@ export class MessagesService {
    * выбирает в найденных нужное по id заказа полученного из параметров запроса и обновляет его.
    * отправляет данные клиенту или сообщение об ошибке
    */
-  async updateMessages(
-    res: Response,
-    token: string,
-    body: UpdateMailDto,
-  ): Promise<void> {
-    const userId = await this.tokenService.getPayloadByCookie(token);
-    if (userId) {
-      const data = await this.getMessagesByDeviceId(userId);
+  async updateMessage(res: Response, body: UpdateMailDto): Promise<void> {
+    const message = await this.getMessagesByOrderId(body.orderId);
 
-      const messages = data.messages;
-      const index = messages.findIndex((el) => el.orderId === body.orderId);
+    message.mail = body.mail;
 
-      messages[index].mail = body.mail;
-
-      await this._updateBD(res, data.messages, ResMessages.UPDATE_MAIL_ERROR);
-    }
+    await this._updateBD(res, message, Messages.UPDATE_MAIL_ERROR);
   }
 
   /**
@@ -121,15 +106,21 @@ export class MessagesService {
   async getMessages(res: Response, token?: string): Promise<void> {
     if (token) {
       this.deviceId = await this.tokenService.getPayloadByCookie(token);
-      this._sendResponseWithCookie(res, 'Сообщения не найдены');
-    }
+
+      const messages = await this.getMessagesByDeviceId(this.deviceId);
+      if (messages) {
+        const selectData = this._selectData(messages);
+
+        this._sendResponseWithCookie(res, Messages.GET_MAILS_ERROR, selectData);
+      }
+    } else res.send(Messages.GET_MAILS_ERROR);
   }
 
   /**
    * по id устройства и полчает существующие сообщения под этим id.
    */
-  async getMessagesByDeviceId(id: string): Promise<MailDto> {
-    const messages = await this.messageModel.findOne({ deviceId: id }).exec();
+  async getMessagesByDeviceId(id: string): Promise<OneMailDto[]> {
+    const messages = await this.messageModel.find({ deviceId: id }).exec();
 
     if (messages) {
       return messages;
@@ -137,11 +128,22 @@ export class MessagesService {
   }
 
   /**
+   * по id обращения и полчает существующие сообщения под этим id.
+   */
+  async getMessagesByOrderId(id: string): Promise<OneMailDto> {
+    const message = await this.messageModel.findOne({ orderId: id }).exec();
+
+    if (message) {
+      return message;
+    } else return null;
+  }
+
+  /**
    * удаляет имя и телефон
    * @param messages - сообщения по id устройства
    */
-  _selectData(messages: MailDto) {
-    const selectData = messages.messages.map((item) => {
+  _selectData(messages: OneMailDto[]) {
+    const selectData = messages.map((item) => {
       delete item.phone;
       delete item.userName;
 
@@ -163,35 +165,8 @@ export class MessagesService {
 
     if (!basket) this.tokenService.deleteToken(res);
     if (data) {
-      res.send({ message: ResMessages.DELETE_MAIL_SUCCESS });
-    } else res.send({ message: ResMessages.DELETE_MAIL_ERROR });
-  }
-
-  /**
-   * проверяет корзину заказов по id устройства. Если есть, то оставляет id устройства тем же иначе создает новое
-   * создает и сохраняет данные в бд
-   */
-  async _createMessages(res: Response, body: MailData): Promise<void> {
-    const basket = await this.basketService.getBasketByDeviceId(this.deviceId);
-    this.deviceId = basket ? this.deviceId : uuidv4();
-    const { dayAndMonth } = getDates();
-    const MailDto: MailDto = {
-      deviceId: this.deviceId,
-      messages: [
-        {
-          orderId: body.orderId,
-          userName: body.name,
-          phone: body.phone,
-          mail: body.mail,
-          created: dayAndMonth,
-        },
-      ],
-    };
-    const createdData = new this.messageModel(MailDto);
-    this.newMessage = await createdData.save();
-
-    if (this.newMessage)
-      this._sendResponseWithCookie(res, ResMessages.CREATE_MAIL_ERROR);
+      res.send({ message: Messages.DELETE_MAIL_SUCCESS });
+    } else res.send({ message: Messages.DELETE_MAIL_ERROR });
   }
 
   /**
@@ -199,16 +174,13 @@ export class MessagesService {
    * создает объект с новыми данными и обновляет бд по id устройства
    * данные отправляет клиенту
    */
-  async _updateBD(res: Response, messages: OneMailDto[], message: string) {
-    const newData: MailDto = {
-      deviceId: this.deviceId,
-      messages,
-    };
-    this.newMessage = await this.messageModel.findOneAndUpdate(
-      { deviceId: this.deviceId },
-      newData,
+  async _updateBD(res: Response, message: OneMailDto, messageError: string) {
+    await this.messageModel.findOneAndUpdate(
+      { orderId: message.orderId },
+      message,
     );
-    this._sendResponseWithCookie(res, message);
+
+    this._sendResponseWithCookie(res, messageError, message);
   }
 
   /**
@@ -216,14 +188,15 @@ export class MessagesService {
    * @param res
    * @param message - сообщение об ошибке
    */
-  async _sendResponseWithCookie(res: Response, message: string) {
-    const messages = await this.getMessagesByDeviceId(this.deviceId);
-    if (messages) {
-      const selectData = this._selectData(messages);
-
+  async _sendResponseWithCookie(
+    res: Response,
+    message: string,
+    data: OneMailDto[] | OneMailDto,
+  ) {
+    if (data) {
       await this.tokenService.sendToken(res, this.deviceId);
 
-      res.send(selectData);
+      res.send(data);
     } else res.send(message);
   }
 }

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { Request, Response } from 'express';
-import { UpdateMailDto, MailData } from './dto/messages.dto';
+import { UpdateMailDto, MailData, OneMailDto } from './dto/messages.dto';
 
 @Controller('messages')
 export class MessagesController {
@@ -34,26 +34,15 @@ export class MessagesController {
   }
 
   @Delete(':id')
-  async deleteMessage(
-    @Res() res: Response,
-    @Req() req: Request,
-    @Param('id') id: string,
-  ): Promise<void> {
-    const token: string = req.cookies.__order;
-    if (token) {
-      await this.messagesService.deleteMessage(res, token, id);
-    }
+  async deleteMessage(@Param('id') id: string): Promise<OneMailDto | null> {
+    return await this.messagesService.deleteMessage(id);
   }
 
   @Put()
   async updateMessage(
     @Res() res: Response,
-    @Req() req: Request,
     @Body() body: UpdateMailDto,
   ): Promise<void> {
-    const token: string = req.cookies.__order;
-    if (token) {
-      await this.messagesService.updateMessages(res, token, body);
-    }
+    await this.messagesService.updateMessage(res, body);
   }
 }

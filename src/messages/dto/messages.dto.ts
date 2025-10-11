@@ -4,6 +4,7 @@ export class MailDto {
 }
 
 export class OneMailDto {
+  deviceId: string;
   orderId: string;
   userName: string;
   phone: string;

@@ -1,4 +1,4 @@
-export enum ResMessages {
+export enum Messages {
   GET_SERVICE_ERROR = 'Данные по услугам не получены',
   DELETE_SERVICE_ERROR = 'Услугу не получилось удалить',
   UPDATE_SERVICE_ERROR = 'Услугу не получилось обновить',
@@ -15,4 +15,5 @@ export enum ResMessages {
   UPDATE_MAIL_ERROR = 'Сообщение не получилось изменить',
   DELETE_MAIL_SUCCESS = 'Сообщение успешно удалено!',
   DELETE_MAIL_ERROR = 'Сообщение не получилось удалить',
+  GET_MAILS_ERROR = 'Сообщения не найдены',
 }

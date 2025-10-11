@@ -44,7 +44,7 @@ export class TokensService {
     return '';
   }
 
-  async getPayloadByCookie(token: string): Promise<string> {
+  async getPayloadByCookie(token: string): Promise<string | null> {
     const payload: TokenPayload = await this.jwtService.verifyAsync(token, {
       secret: this.configService.get<string>('token_secret'),
     });
@@ -52,8 +52,7 @@ export class TokensService {
     if (payload) {
       return payload.deviceId;
     } else {
-      console.log('no');
-      return 'no';
+      return null;
     }
   }
 

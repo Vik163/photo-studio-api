@@ -25,61 +25,61 @@ export class AdminMailService {
     this.newOrder = null;
   }
 
-  _selectDataFromOrders(data: MailDto[]): OrdersUserDto[] {
-    return data.map((userOrders) => {
-      const arrOrders = userOrders.messages.map((order) => {
-        return {
-          orderId: order.orderId,
-          userName: order.userName,
-          phone: order.phone,
-          mail: order.mail,
-          mailAdmin: order.mailAdmin,
-          created: order.created,
-        };
-      });
-      return { deviceId: userOrders.deviceId, data: arrOrders };
-    });
-  }
+  // _selectDataFromOrders(data: MailDto[]): OrdersUserDto[] {
+  //   return data.map((userOrders) => {
+  //     const arrOrders = userOrders.messages.map((order) => {
+  //       return {
+  //         orderId: order.orderId,
+  //         userName: order.userName,
+  //         phone: order.phone,
+  //         mail: order.mail,
+  //         mailAdmin: order.mailAdmin,
+  //         created: order.created,
+  //       };
+  //     });
+  //     return { deviceId: userOrders.deviceId, data: arrOrders };
+  //   });
+  // }
 
-  async getMails() {
-    const data: MailDto[] = await this.mailModel.find().exec();
+  // async getMails() {
+  //   const data: MailDto[] = await this.mailModel.find().exec();
 
-    const selectData = this._selectDataFromOrders(data);
+  //   const selectData = this._selectDataFromOrders(data);
 
-    return selectData;
-  }
+  //   return selectData;
+  // }
 
-  async _getMailsByDeviceId(deviceId: string): Promise<MailDto> {
-    const data: MailDto = await this.mailModel
-      .findOne({ deviceId: deviceId })
-      .exec();
+  // async _getMailsByDeviceId(deviceId: string): Promise<MailDto> {
+  //   const data: MailDto = await this.mailModel
+  //     .findOne({ deviceId: deviceId })
+  //     .exec();
 
-    return data;
-  }
+  //   return data;
+  // }
 
-  async updateMail(body: UpdateData): Promise<OneOrder | undefined> {
-    this.deviceId = body.deviceId;
-    const mailsData = await this._getMailsByDeviceId(this.deviceId);
-    const messages = mailsData.messages;
-    const index = messages.findIndex((el) => el.orderId === body.orderId);
+  // async updateMail(body: UpdateData): Promise<OneOrder | undefined> {
+  //   this.deviceId = body.deviceId;
+  //   const mailsData = await this._getMailsByDeviceId(this.deviceId);
+  //   const messages = mailsData.messages;
+  //   const index = messages.findIndex((el) => el.orderId === body.orderId);
 
-    if (body.mailAdmin) messages[index].mailAdmin = body.mailAdmin;
+  //   if (body.mailAdmin) messages[index].mailAdmin = body.mailAdmin;
 
-    const data = await this._updateBD(messages);
-    if (data) return messages[index];
-  }
+  //   const data = await this._updateBD(messages);
+  //   if (data) return messages[index];
+  // }
 
-  async _updateBD(messages: OneMailDto[]) {
-    const newData: MailDto = {
-      deviceId: this.deviceId,
-      messages,
-    };
+  // async _updateBD(messages: OneMailDto[]) {
+  //   const newData: MailDto = {
+  //     deviceId: this.deviceId,
+  //     messages,
+  //   };
 
-    return await this.mailModel.findOneAndUpdate(
-      { deviceId: this.deviceId },
-      newData,
-    );
-  }
+  //   return await this.mailModel.findOneAndUpdate(
+  //     { deviceId: this.deviceId },
+  //     newData,
+  //   );
+  // }
   //   async _deleteDataBydeviceId(res: Response, deviceId: string) {
   //     const data = await this.orderModel
   //       .findOneAndDelete({ deviceId: deviceId })

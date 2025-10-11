@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDates } from 'src/utils/lib/getDates';
 import { Response } from 'express';
 
-import { ResMessages } from 'src/utils/constants/messages';
+import { Messages } from 'src/utils/constants/messages';
 import { Services } from './schemas/services.schema';
 import {
   AdminOneServiceDto,
@@ -41,7 +41,7 @@ export class AdminServicesService {
     if (existServices) {
       const updateData = await this._updateBD(
         existServices,
-        ResMessages.CREATE_SERVICE_ERROR,
+        Messages.CREATE_SERVICE_ERROR,
       );
 
       if (updateData) return this.newService;
@@ -96,7 +96,7 @@ export class AdminServicesService {
 
     if (services) {
       return services;
-    } else return ResMessages.GET_SERVICE_ERROR;
+    } else return Messages.GET_SERVICE_ERROR;
   }
 
   /**
