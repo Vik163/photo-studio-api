@@ -22,6 +22,14 @@ export class BasketService {
   }
 
   /**
+   * Находит заказы по id заказа
+   */
+  async getDataByOrderId(orderId: string): Promise<OneOrderDto> {
+    const data = await this.orderModel.findOne({ orderId }).exec();
+    return data;
+  }
+
+  /**
    * Фильтрует данные заказа. Удаляет телефон
    * @param order
    * @returns

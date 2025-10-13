@@ -26,31 +26,31 @@ export class AdminController {
     private basketService: BasketService,
   ) {}
 
-  // @Get('orders')
-  // async getOrders(): Promise<OrdersUserDto[]> {
-  //   return this.adminOrderService.getOrders();
-  // }
+  @Get('orders')
+  async getOrders(): Promise<OrdersUserDto[]> {
+    return await this.adminOrderService.getOrders();
+  }
 
-  // @Get('messages')
-  // async getMails(): Promise<OrdersUserDto[]> {
-  //   return this.adminMailService.getMails();
-  // }
+  @Get('messages')
+  async getMails(): Promise<OrdersUserDto[]> {
+    return this.adminMailService.getMails();
+  }
 
-  // @Put()
-  // async updateData(@Body() body: UpdateData): Promise<OneOrder> {
-  //   const completedImages = body.completedImages;
-  //   if ((completedImages && completedImages.length > 0) || body.status) {
-  //     return await this.adminOrderService.updateOrder(body);
-  //   } else {
-  //     return await this.adminMailService.updateMail(body);
-  //   }
-  // }
+  @Put()
+  async updateData(@Body() body: UpdateData): Promise<OneOrder> {
+    const completedImages = body.completedImages;
+    if ((completedImages && completedImages.length > 0) || body.status) {
+      return await this.adminOrderService.updateOrder(body);
+    } else {
+      return await this.adminMailService.updateMail(body);
+    }
+  }
 
-  // @Delete('orders/:id')
-  // async cancelOrder(
-  //   @Param('id') id: string,
-  //   @Body() body: { deviceId: string; mailAdmin: string },
-  // ): Promise<string> {
-  //   return await this.adminOrderService.cancelOrder(body, id);
-  // }
+  @Delete('orders/:id')
+  async cancelOrder(
+    @Param('id') id: string,
+    @Body() body: { mailAdmin: string },
+  ): Promise<string> {
+    return await this.adminOrderService.cancelOrder(body, id);
+  }
 }

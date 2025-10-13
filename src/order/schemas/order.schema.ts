@@ -41,6 +41,9 @@ export class Order {
 
   @Prop()
   created: string;
+
+  @Prop()
+  expireAt?: number;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

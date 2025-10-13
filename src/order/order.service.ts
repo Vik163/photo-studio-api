@@ -86,8 +86,7 @@ export class OrderService {
    * отправляет данные клиенту или сообщение об ошибке
    */
   async updateOrder(res: Response, body: BodyDto, token?: string) {
-    console.log('body:', body);
-    const order = await this.getDataByOrderId(body.orderId);
+    const order = await this.basketService.getDataByOrderId(body.orderId);
     if (order) {
       order.images = body.images;
       order.mail = body.mail;
@@ -98,14 +97,6 @@ export class OrderService {
 
       await this._updateBD(res, order, Messages.UPDATE_ORDER_ERROR);
     }
-  }
-
-  /**
-   * Находит заказы по id заказа
-   */
-  async getDataByOrderId(orderId: string): Promise<OneOrderDto> {
-    const data = await this.orderModel.findOne({ orderId }).exec();
-    return data;
   }
 
   /**

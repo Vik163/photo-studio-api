@@ -6,6 +6,7 @@ export class OrdersUserDto {
 }
 
 export interface OneOrder {
+  deviceId: string;
   orderId: string;
   userName?: string;
   phone?: string;
@@ -14,9 +15,11 @@ export interface OneOrder {
   images?: string[];
   mailAdmin?: string;
   completedImages?: string[]; // src сформированный fileReader  (хранится только в БД)
+  createdAt?: Date;
   status?: StatusOrder;
   created: string;
   leftDays?: number;
+  expireAt?: number;
 }
 
 export interface UpdateData {
@@ -25,14 +28,4 @@ export interface UpdateData {
   mailAdmin?: string;
   status?: StatusOrder;
   completedImages?: string[];
-}
-
-export interface DataCancelOrder {
-  deviceId: string;
-  orderId: string;
-  service: string;
-  mailAdmin: string;
-  created: string;
-  status: 'Отменён';
-  expireAt?: number;
 }

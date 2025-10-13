@@ -34,7 +34,6 @@ export class OneOrderDto {
   status: StatusOrder;
   createdAt?: Date;
   created: string;
-  expireAt?: number;
 }
 
 export class ResOrdersDto {
