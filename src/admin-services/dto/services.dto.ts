@@ -11,13 +11,13 @@ export type AdminServicesDto = {
 
 export class AdminOneServiceDto {
   id: string;
-  service: string;
+  value: string;
   price?: string;
 }
 
 export class BodyServiceDto {
   type: TypeServices;
   id: string;
-  service: string;
+  value: string;
   price?: string;
 }

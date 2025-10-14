@@ -51,7 +51,7 @@ export class AdminServicesService {
         services: [
           {
             id,
-            service: body.service,
+            value: body.value,
             price: body.price,
           },
         ],
@@ -130,7 +130,7 @@ export class AdminServicesService {
     if (!isExist)
       arrServices.push({
         id: this.newService.id,
-        service: this.newService.service,
+        value: this.newService.value,
         price: this.newService.price,
       });
 
