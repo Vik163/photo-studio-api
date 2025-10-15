@@ -30,6 +30,21 @@ export class BasketService {
   }
 
   /**
+   * Находит заказы по id заказа
+   */
+  async getDataByNumPhone(res: Response, phone: string): Promise<OneOrderDto> {
+    const data = await this.orderModel.findOne({ phone }).exec();
+    if (data) {
+      await this.tokenService.sendToken(res, data.deviceId);
+
+      res.send('Ok');
+
+      return data;
+    }
+    return null;
+  }
+
+  /**
    * Фильтрует данные заказа. Удаляет телефон
    * @param order
    * @returns
@@ -68,7 +83,6 @@ export class BasketService {
     if (newOrder) {
       await this.tokenService.sendToken(res, newOrder.deviceId);
 
-      console.log('newOrder:', newOrder);
       res.send(newOrder);
     } else res.send({ message });
   }

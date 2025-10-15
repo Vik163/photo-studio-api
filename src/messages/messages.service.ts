@@ -138,6 +138,18 @@ export class MessagesService {
     } else return null;
   }
 
+  async getMessagesByNumPhone(
+    res: Response,
+    phone: string,
+  ): Promise<OneMailDto> {
+    const message = await this.messageModel.findOne({ phone }).exec();
+
+    if (message) {
+      this._sendResponseWithCookie(res, Messages.GET_MAILS_ERROR, message);
+      return message;
+    } else return null;
+  }
+
   /**
    * удаляет имя и телефон
    * @param messages - сообщения по id устройства
