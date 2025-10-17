@@ -145,9 +145,11 @@ export class MessagesService {
     const message = await this.messageModel.findOne({ phone }).exec();
 
     if (message) {
-      this._sendResponseWithCookie(res, Messages.GET_MAILS_ERROR, message);
+      await this.tokenService.sendToken(res, message.deviceId);
+
       return message;
-    } else return null;
+    }
+    return null;
   }
 
   /**

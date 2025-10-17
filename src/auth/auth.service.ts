@@ -29,19 +29,18 @@ export class AuthService {
     const order = await this.basketService.getDataByNumPhone(res, data.phone);
 
     if (!order) {
-      console.log('order:', order);
       const message = await this.messagesService.getMessagesByNumPhone(
         res,
         data.phone,
       );
 
-      if (!message) res.send('Заказов и сообщений не найдено');
-
-      console.log('message:', message);
+      if (!message) {
+        res.send('Заказов и сообщений не найдено');
+      } else {
+        res.send('Данные по вашим заказам получены');
+      }
+    } else {
+      res.send('Данные по вашим заказам получены');
     }
-
-    // if (pass.pass === process.env.ADMIN_PASSWORD) {
-    //   this.tokensService.sendAdminTokens(res);
-    // } else this.tokensService.deleteAdminTokens(res);
   }
 }

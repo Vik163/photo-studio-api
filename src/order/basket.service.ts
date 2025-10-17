@@ -34,10 +34,10 @@ export class BasketService {
    */
   async getDataByNumPhone(res: Response, phone: string): Promise<OneOrderDto> {
     const data = await this.orderModel.findOne({ phone }).exec();
+    console.log('data:', data);
+
     if (data) {
       await this.tokenService.sendToken(res, data.deviceId);
-
-      res.send('Ok');
 
       return data;
     }
