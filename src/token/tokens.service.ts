@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { v4 as uuidv4 } from 'uuid';
 
 interface TokenPayload {
   deviceId: string;
@@ -20,7 +21,9 @@ export class TokensService {
     adminToken: string;
     controlToken: string;
   }> {
-    const payload = { adminId: 'admin' };
+    const adminId = uuidv4();
+
+    const payload = { adminId };
 
     const adminToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('admin_token_secret'),
@@ -67,7 +70,6 @@ export class TokensService {
       });
       return true;
     } else {
-      return false;
     }
   }
 

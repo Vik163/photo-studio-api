@@ -13,23 +13,27 @@ import {
   BodyServiceDto,
   TypeServices,
 } from './dto/services.dto';
+import { AccessToken } from 'src/common/decorators/accessToken.decorator';
 
 @Controller('admin')
 export class AdminServicesController {
   constructor(readonly servicesService: AdminServicesService) {}
 
+  @AccessToken()
   @Put('services')
   async editService(@Body() body: BodyServiceDto): Promise<BodyServiceDto> {
     return await this.servicesService.editService(body);
   }
 
+  @AccessToken()
   @Get('services')
-  async getMessages(): Promise<AdminServicesDto[] | string> {
+  async getServices(): Promise<AdminServicesDto[] | string> {
     return await this.servicesService.getServices();
   }
 
+  @AccessToken()
   @Delete('services/:id')
-  async deleteMessage(
+  async deleteService(
     @Param('id') id: string,
     @Query() query: { type: TypeServices },
   ): Promise<string | null> {

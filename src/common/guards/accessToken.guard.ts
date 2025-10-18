@@ -1,25 +1,35 @@
 import {
+  CanActivate,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
-export class AccessTokenGuard extends AuthGuard('jwt') {
-  canActivate(context: ExecutionContext) {
-    // Add your custom authentication logic here
-    // for example, call super.logIn(request) to establish a session.
-    return super.canActivate(context);
-  }
+export class AccessTokenGuard implements CanActivate {
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
-  // добавляется по надобности
-  handleRequest(err: any, user: any) {
-    // You can throw an exception based on either "info" or "err" arguments
-    if (err || !user) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request = context.switchToHttp().getRequest();
+    const token = request.cookies['__secure_admin'];
+    if (!token) {
       throw new UnauthorizedException();
-    } else {
-      return user;
     }
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('admin_token_secret'),
+      });
+
+      request['adminId'] = payload.adminId;
+    } catch {
+      throw new UnauthorizedException();
+    }
+    return true;
   }
 }
