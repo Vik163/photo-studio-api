@@ -25,7 +25,6 @@ export class AdminServicesController {
     return await this.servicesService.editService(body);
   }
 
-  @AccessToken()
   @Get('services')
   async getServices(): Promise<AdminServicesDto[] | string> {
     return await this.servicesService.getServices();
