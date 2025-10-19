@@ -118,9 +118,15 @@ export class AdminOrderService {
         images: null,
         mail: '',
         status: 'Отменён',
-        expireAt: 1,
+        expireAt: new Date(), // Удаляет из базы через 15 секунд после установки expireAt (index устанавливается в схеме)
       },
     );
+
+    console.log(
+      'this.orderModel.collection:',
+      await this.orderModel.collection.getIndexes(),
+    );
+
     if (res) return 'ok';
 
     return null;

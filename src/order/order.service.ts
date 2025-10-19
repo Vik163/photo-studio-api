@@ -57,6 +57,7 @@ export class OrderService {
       createdAt: date,
       created: dayAndMonth,
     };
+
     const createdData = new this.orderModel(order);
     this.newOrder = await createdData.save();
 

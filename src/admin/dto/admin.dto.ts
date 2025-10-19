@@ -19,7 +19,7 @@ export interface OneOrder {
   status?: StatusOrder;
   created: string;
   leftDays?: number;
-  expireAt?: number;
+  expireAt?: Date;
 }
 
 export interface UpdateData {

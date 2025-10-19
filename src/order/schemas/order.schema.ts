@@ -43,9 +43,11 @@ export class Order {
   created: string;
 
   @Prop()
-  expireAt?: number;
+  expireAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
-OrderSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+// Удаляет из базы через 15 секунд после установки expireAt (могут быть задержки по времени)
+OrderSchema.index({ expireAt: 1 }, { expireAfterSeconds: 15 });
+OrderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
