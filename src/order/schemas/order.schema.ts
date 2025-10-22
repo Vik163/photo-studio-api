@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { OneOrderDto, StatusOrder } from '../dto/order.dto';
+import { config } from 'src/config/configuration';
+
+const configuration = config();
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -49,5 +52,11 @@ export class Order {
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 // Удаляет из базы через 15 секунд после установки expireAt (могут быть задержки по времени)
-OrderSchema.index({ expireAt: 1 }, { expireAfterSeconds: 15 });
-OrderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
+OrderSchema.index(
+  { expireAt: 1 },
+  { expireAfterSeconds: configuration['time_live_cancel_order'] },
+);
+OrderSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: configuration['time_live_order'] },
+);

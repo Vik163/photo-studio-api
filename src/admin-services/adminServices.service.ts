@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-
+import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { getDates } from 'src/utils/lib/getDates';
 import { Response } from 'express';
@@ -14,6 +14,7 @@ import {
   BodyServiceDto,
   TypeServices,
 } from './dto/services.dto';
+import { config } from 'src/config/configuration';
 
 @Injectable()
 export class AdminServicesService {

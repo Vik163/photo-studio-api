@@ -12,4 +12,7 @@ export const config = (): ConfigProps => ({
   admin_token_secret: process.env.ADMIN_TOKEN_SECRET,
   time_token: 60 * 60 * 24 * 1000 * 15,
   api: process.env.API_URL,
+  time_live_cancel_order: 15,
+  time_live_order: 86400 * 10,
+  time_live_mail: 86400 * 5,
 });
