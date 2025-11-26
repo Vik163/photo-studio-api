@@ -9,6 +9,7 @@ import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { AdminServicesModule } from './admin-services/adminServices.module';
+import { ArduinoModule } from './arduino/arduino.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AdminServicesModule } from './admin-services/adminServices.module';
     OrderModule,
     MessagesModule,
     AdminServicesModule,
+    ArduinoModule,
   ],
 })
 export class AppModule {}

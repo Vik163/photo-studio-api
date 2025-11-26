@@ -6,6 +6,8 @@ export const config = (): ConfigProps => ({
     'https://photostudio.ru',
     'https://127.0.0.1:3000',
     'https://photosalon.online',
+    'https://192.168.0.15',
+    'https://192.168.0.16',
   ],
   token_secret: process.env.TOKEN_SECRET,
   control_token_secret: process.env.CONTROL_TOKEN_SECRET,
