@@ -10,24 +10,23 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ArduinoDto } from './dto/arduino.dto';
+import { ArduinoService } from './arduino.service';
 
 @Controller('ard')
 export class ArduinoController {
-  constructor() {}
+  constructor(private arduinoService: ArduinoService) {}
 
-  //   @Post()
-  //   async addMesssage(
-  //     @Res() res: Response,
-  //     @Req() req: Request,
-  //     @Body() body: MailData,
-  //   ): Promise<void> {
-  //   }
+  @Post()
+  async addData(@Body() body: ArduinoDto): Promise<string> {
+    console.log(body);
+
+    return await this.arduinoService.addData(body);
+  }
 
   @Get()
-  async getMessages(): Promise<string> {
-    console.log('io');
-
-    return 'this.messagesService';
+  async getData(): Promise<ArduinoDto> {
+    return await this.arduinoService.getData();
   }
 
   //   @Delete(':id')
