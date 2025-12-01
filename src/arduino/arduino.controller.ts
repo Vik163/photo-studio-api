@@ -19,7 +19,7 @@ export class ArduinoController {
 
   @Post()
   async addData(@Body() body: ArduinoDto): Promise<string> {
-    console.log(body);
+    // console.log(body);
 
     return await this.arduinoService.addData(body);
   }

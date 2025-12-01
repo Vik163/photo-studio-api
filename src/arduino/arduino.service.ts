@@ -15,12 +15,11 @@ export class ArduinoService {
     const existData = await this.getData();
 
     if (existData) {
-      return await this.updateData(existData);
+      return await this.updateData(body, existData.id);
     } else {
-      body.id = uuidv4();
+      body.id = 'stat';
       const createdData = new this.arduinoModel(body);
       const saveData = await createdData.save();
-      console.log('saveData:', saveData);
 
       if (saveData) {
         return 'ok';
@@ -45,16 +44,16 @@ export class ArduinoService {
   //     }
   //   }
 
-  async updateData(existData: ArduinoDto): Promise<string> {
+  async updateData(body: ArduinoDto, id: string): Promise<string> {
     const newData: ArduinoDto = {
-      id: existData.id,
-      min: existData.min,
-      max: existData.max,
-      avr: existData.avr,
-      thd: existData.thd,
+      id,
+      min: body.min,
+      max: body.max,
+      avr: body.avr,
+      thd: body.thd,
     };
     const updateData = await this.arduinoModel.findOneAndUpdate(
-      { id: existData.id },
+      { id },
       newData,
     );
     if (updateData) {
