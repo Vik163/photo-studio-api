@@ -29,6 +29,14 @@ export class ArduinoController {
     return await this.arduinoService.getData();
   }
 
+  @Post('push')
+  async sendPush(@Req() req: Request): Promise<void> {
+    const text = req.body;
+    await fetch(
+      `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
+    );
+  }
+
   //   @Delete(':id')
   //   async deleteMessage(@Param('id') id: string): Promise<OneMailDto | null> {
   //     return await this.messagesService.deleteMessage(id);

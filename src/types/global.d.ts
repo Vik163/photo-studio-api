@@ -11,6 +11,9 @@ declare global {
       TOKEN_SECRET: string;
       ADMIN_TOKEN_SECRET: string;
       TIME_TOKENS: number;
+      ARD_TELEG_TOKEN: string;
+      ARD_TELEG_ID: string;
+      ARD_USER_PASS: string;
     }
   }
 }
