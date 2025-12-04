@@ -11,7 +11,6 @@ import * as passport from 'passport';
 //   key: readFileSync('../security/photostudio.ru+3-key.pem'),
 //   cert: readFileSync('../security/photostudio.ru+3.pem'),
 // };
-//https://api.telegram.org/bot8086716133:AAG5ln4XXztQ9lWlDWGmYm1zKCNrwb35hvY/sendMessage?chat_id=5118278868&text=ТЕКСТ_МОЕГО_СООБЩЕНИЯ
 
 // NestExpressApplication добавляю, чтобы получать простой текст в запросах (по умолчанию отсутствует)
 // rawBody: true, - опции приложения
