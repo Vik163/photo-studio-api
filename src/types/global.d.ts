@@ -14,6 +14,10 @@ declare global {
       ARD_TELEG_TOKEN: string;
       ARD_TELEG_ID: string;
       ARD_USER_PASS: string;
+      ARD_MQTT_HOST: string;
+      ARD_MQTT_PORT: number;
+      ARD_MQTT_USER_PASS: string;
+      ARD_MQTT_USER_NAME: string;
     }
   }
 }

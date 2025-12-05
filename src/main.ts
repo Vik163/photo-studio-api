@@ -6,6 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import * as passport from 'passport';
+import { mqttConnect } from './utils/lib/mqttBroker';
+import { Logger } from '@nestjs/common';
+import { CustomLogger } from './common/logger/customLogger';
 
 // const httpsOptions = {
 //   key: readFileSync('../security/photostudio.ru+3-key.pem'),
@@ -44,6 +47,10 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe());
 
   app.use(passport.initialize());
+
+  await mqttConnect();
+
+  app.useLogger(app.get(CustomLogger));
 
   await app.listen(port);
   console.log(`server listen port ${port}`);
