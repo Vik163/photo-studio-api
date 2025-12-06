@@ -18,6 +18,7 @@ declare global {
       ARD_MQTT_PORT: number;
       ARD_MQTT_USER_PASS: string;
       ARD_MQTT_USER_NAME: string;
+      ARD_TOKEN: string;
     }
   }
 }

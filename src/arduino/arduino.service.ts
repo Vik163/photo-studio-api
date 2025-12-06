@@ -3,7 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Arduino } from './schemas/arduino.schema';
 import { Model } from 'mongoose';
 import { ArduinoDto } from './dto/arduino.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class ArduinoService {
@@ -25,6 +26,12 @@ export class ArduinoService {
         return 'ok';
       } else return 'no';
     }
+  }
+
+  async login(token: string): Promise<{ auth: boolean }> {
+    if (token === process.env.ARD_TOKEN) {
+      return { auth: true };
+    } else return { auth: false };
   }
 
   /**

@@ -19,14 +19,22 @@ export class ArduinoController {
 
   @Post()
   async addData(@Body() body: ArduinoDto): Promise<string> {
-    console.log(body);
-
     return await this.arduinoService.addData(body);
   }
 
   @Get()
   async getData(): Promise<ArduinoDto> {
     return await this.arduinoService.getData();
+  }
+
+  @Post('auth')
+  async login(
+    @Req() req: Request,
+    @Body() body: string,
+  ): Promise<{ auth: boolean }> {
+    const secret = req.headers['authorization'];
+    const token = `${body}:${secret}`;
+    return await this.arduinoService.login(token);
   }
 
   @Post('push')
