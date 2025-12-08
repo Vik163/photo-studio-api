@@ -1,5 +1,7 @@
 import mqtt from 'mqtt';
 
+type Status = 'online' | 'offline';
+
 const topic = 'home/status';
 
 const connectUrl = `mqtt://${process.env.ARD_MQTT_HOST}:${process.env.ARD_MQTT_PORT}`;
@@ -17,13 +19,12 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, payload) => {
-  console.log('Home:', payload.toString());
-  const text = 'Нет связи с домом';
+  const status = payload.toString() as Status;
+  const text = `Статус дома **${status}**`;
 
-  if (payload.toString() === 'offline')
-    fetch(
-      `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
-    );
+  fetch(
+    `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
+  );
 });
 
 export async function mqttConnect() {}
