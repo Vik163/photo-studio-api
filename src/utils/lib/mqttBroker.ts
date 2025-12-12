@@ -2,7 +2,8 @@ import mqtt from 'mqtt';
 
 type Status = 'online' | 'offline';
 
-const topic = 'home/status';
+const topicStatus = 'home/status';
+const topicTimer = 'home/timer';
 
 const connectUrl = `mqtt://${process.env.ARD_MQTT_HOST}:${process.env.ARD_MQTT_PORT}`;
 
@@ -15,16 +16,21 @@ const client = mqtt.connect(connectUrl, {
 });
 
 client.on('connect', () => {
-  client.subscribe([topic], () => {});
+  client.subscribe([topicStatus, topicTimer], () => {});
 });
 
 client.on('message', (topic, payload) => {
+  console.log('topic:', topic);
   const status = payload.toString() as Status;
   const text = `Статус дома **${status}**`;
 
-  fetch(
-    `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
-  );
+  if (topic === topicStatus) {
+    console.log('Status:');
+
+    // fetch(
+    //   `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
+    // );
+  }
 });
 
 export async function mqttConnect() {}

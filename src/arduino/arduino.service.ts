@@ -3,20 +3,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Arduino } from './schemas/arduino.schema';
 import { Model } from 'mongoose';
 import { ArduinoDto } from './dto/arduino.dto';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class ArduinoService {
-  constructor(
-    @InjectModel(Arduino.name) private arduinoModel: Model<Arduino>,
-  ) {}
+  existData: ArduinoDto;
+
+  constructor(@InjectModel(Arduino.name) private arduinoModel: Model<Arduino>) {
+    this.existData = null;
+  }
 
   async addData(body: ArduinoDto): Promise<string> {
-    const existData = await this.getData();
+    this.existData = await this.getData();
 
-    if (existData) {
-      return await this.updateData(body, existData.id);
+    if (this.existData) {
+      return await this.updateData(body, this.existData.id);
     } else {
       body.id = 'stat';
       const createdData = new this.arduinoModel(body);
@@ -54,10 +54,12 @@ export class ArduinoService {
   async updateData(body: ArduinoDto, id: string): Promise<string> {
     const newData: ArduinoDto = {
       id,
-      min: body.min,
-      max: body.max,
-      avr: body.avr,
-      thd: body.thd,
+      min: body.min || this.existData.min,
+      max: body.max || this.existData.max,
+      avr: body.avr || this.existData.avr,
+      thd: body.thd || this.existData.thd,
+      timerOutLight: body.timerOutLight || this.existData.timerOutLight,
+      outLight: body.outLight || this.existData.outLight,
     };
     const updateData = await this.arduinoModel.findOneAndUpdate(
       { id },

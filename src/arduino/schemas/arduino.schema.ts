@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { SwitchStatus } from '../dto/arduino.dto';
 
 export type ArduinoDocument = HydratedDocument<Arduino>;
 
@@ -19,6 +20,12 @@ export class Arduino {
 
   @Prop()
   thd?: number[];
+
+  @Prop()
+  timerOutLight?: string[];
+
+  @Prop()
+  outLight: SwitchStatus;
 }
 
 export const ArduinoSchema = SchemaFactory.createForClass(Arduino);
