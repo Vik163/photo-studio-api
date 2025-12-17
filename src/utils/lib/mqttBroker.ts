@@ -20,16 +20,13 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, payload) => {
-  console.log('topic:', topic);
   const status = payload.toString() as Status;
   const text = `Статус дома **${status}**`;
 
   if (topic === topicStatus) {
-    console.log('Status:');
-
-    // fetch(
-    //   `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
-    // );
+    fetch(
+      `https://api.telegram.org/bot${process.env.ARD_TELEG_TOKEN}/sendMessage?chat_id=${process.env.ARD_TELEG_ID}&text=${text}`,
+    );
   }
 });
 
